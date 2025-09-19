@@ -1,9 +1,9 @@
 import { useForm } from "react-hook-form";
-import { Button, Input, Stack } from "@mui/joy";
 import type { FixedArray, NumberCharacter } from "../types.ts";
 import { DateTime } from "luxon";
 import { decodePesel, validatePesel } from "../pesel.ts";
 import Field from "./Field.tsx";
+import { Button, Stack, TextField } from "@mui/material";
 
 type PeselFormFields = {
     birthDate: string;
@@ -47,17 +47,17 @@ export default function PeselForm({onSuccess}: { onSuccess: (output: PeselFormOu
     return <form onSubmit={onSubmit}>
         <Stack spacing={2}>
             <Field label="Date urodzenia" fieldError={errors.birthDate}>
-                <Input {...register(
+                <TextField {...register(
                     "birthDate",
                     {required: true, validate: birthDateValidate}
                 )} placeholder="Np. 31.03.1999"/>
             </Field>
 
             <Field label="PESEL" fieldError={errors.pesel}>
-                <Input {...register("pesel", {required: true, validate: peselValidate})}/>
+                <TextField {...register("pesel", {required: true, validate: peselValidate})}/>
             </Field>
 
-            <Button type="submit" disabled={!formState.isValid}>Dalej</Button>
+            <Button type="submit" color='primary' disabled={!formState.isValid}>Dalej</Button>
         </Stack>
     </form>
 }
@@ -94,7 +94,15 @@ function peselValidate(peselString: string, formValues: PeselFormFields) {
     }
 
     const peselBirthDate = decodePesel(peselString).birthDate;
+
+    if (!formValues.birthDate) {
+        return true;
+    }
+
     const birthDate = parseDate(formValues.birthDate);
+    if (!birthDate.isValid) {
+        return true;
+    }
 
     if (!peselBirthDate.equals(birthDate)) {
         return "Numer PESEL nie jest zgodny z podaną datą urodzenia."

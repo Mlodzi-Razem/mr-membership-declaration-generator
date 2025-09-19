@@ -1,12 +1,26 @@
-import { FormControl, FormHelperText, FormLabel } from "@mui/joy";
 import type { FieldError } from "react-hook-form";
+import { Checkbox, FormControl, FormHelperText, FormLabel, Select, TextField } from "@mui/material";
+import * as React from "react";
 
-export default function Field({label, fieldError, children}: {fieldError?: FieldError, children: React.ReactNode, label: string}) {
-    return  <FormControl error={!!fieldError}>
+export default function Field({label, fieldError, children}: {
+    fieldError?: FieldError,
+    children: React.ReactElement<typeof TextField | typeof Checkbox | typeof Select>,
+    label: string
+}) {
+    if (!children) {
+        throw new Error("Field must have children");
+    }
+
+    const requiresHelperText = children.type === Checkbox;
+
+    return <FormControl error={!!fieldError}>
         <FormLabel>{label}</FormLabel>
-        {children}
-        {fieldError && <FormHelperText>
-            {fieldError.message}
-        </FormHelperText>}
+        {requiresHelperText
+            ? children
+            : React.cloneElement(
+                children,
+                {error: !!fieldError, helperText: fieldError?.message} as never
+            )}
+        {fieldError && requiresHelperText && <FormHelperText>{fieldError.message}</FormHelperText>}
     </FormControl>
 }
