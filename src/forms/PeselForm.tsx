@@ -1,9 +1,9 @@
-import { useForm } from "react-hook-form";
 import type { FixedArray, NumberCharacter } from "../types.ts";
 import { DateTime } from "luxon";
 import { decodePesel, validatePesel } from "../pesel.ts";
-import Field from "./Field.tsx";
-import { Button, Stack, TextField } from "@mui/material";
+import MrField from "./MrField.tsx";
+import { TextField } from "@mui/material";
+import MrForm from "./MrForm.tsx";
 
 type PeselFormFields = {
     birthDate: string;
@@ -16,51 +16,55 @@ export type PeselFormOutput = {
         month: [NumberCharacter, NumberCharacter],
         year: [NumberCharacter, NumberCharacter, NumberCharacter, NumberCharacter],
     },
-    pesel: FixedArray<NumberCharacter, 11>
+    pesel: FixedArray<NumberCharacter, 11>,
+    requiresParentalConsent: boolean;
 }
 
 const DATE_PATTERN = /\d\d\.\d\d\.\d\d\d\d/;
 const PESEL_PATTERN = /\d{11}/;
 
-export default function PeselForm({onSuccess}: { onSuccess: (output: PeselFormOutput) => void }) {
-    const {register, handleSubmit, formState, getValues} = useForm<PeselFormFields>()
+function isParentalConsentRequired(birthDate: string): boolean {
+    const parsedDate = parseDate(birthDate);
 
-    const onSubmit = handleSubmit(() => {
-        const values = getValues();
+    return DateTime.now().diff(parsedDate, 'years').years < 16;
+}
 
-        const [birthDay, birthMonth, birthYear] = values.birthDate.split('.');
+const PeselForm = MrForm<PeselFormFields, PeselFormOutput>((form, onSuccess) => {
+    const {register, formState: {errors}, getValues} = form;
 
-        const output: PeselFormOutput = {
-            birthDate: {
-                day: birthDay.split("") as never,
-                month: birthMonth.split("") as never,
-                year: birthYear.split("") as never
-            },
-            pesel: values.pesel.split("") as never,
-        }
+    return {
+        onSubmit: () => {
+            const values = getValues();
 
-        onSuccess(output);
-    });
+            const [birthDay, birthMonth, birthYear] = values.birthDate.split('.');
 
-    const errors = formState.errors;
+            const output: PeselFormOutput = {
+                birthDate: {
+                    day: birthDay.split("") as never,
+                    month: birthMonth.split("") as never,
+                    year: birthYear.split("") as never
+                },
+                pesel: values.pesel.split("") as never,
+                requiresParentalConsent: isParentalConsentRequired(values.birthDate)
+            }
 
-    return <form onSubmit={onSubmit}>
-        <Stack spacing={2}>
-            <Field label="Date urodzenia" fieldError={errors.birthDate}>
+            onSuccess(output);
+        },
+        node: <>
+            <MrField label="Date urodzenia" fieldError={errors.birthDate}>
                 <TextField {...register(
                     "birthDate",
                     {required: true, validate: birthDateValidate}
                 )} placeholder="Np. 31.03.1999"/>
-            </Field>
+            </MrField>
 
-            <Field label="PESEL" fieldError={errors.pesel}>
+            <MrField label="PESEL" fieldError={errors.pesel}>
                 <TextField {...register("pesel", {required: true, validate: peselValidate})}/>
-            </Field>
-
-            <Button type="submit" color='primary' disabled={!formState.isValid}>Dalej</Button>
-        </Stack>
-    </form>
-}
+            </MrField>
+        </>
+    }
+});
+export default PeselForm;
 
 function parseDate(dateString: string) {
     return DateTime.fromFormat(dateString, "dd.MM.yyyy");
