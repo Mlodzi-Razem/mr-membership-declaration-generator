@@ -1,9 +1,12 @@
 import { Step, StepLabel, Stepper } from "@mui/material";
 import type { PeselFormOutput } from "./forms/PeselForm.tsx";
-
+import type { ContactFormOutput } from "./forms/ContactForm.tsx";
+import type { OccupationFormOutput } from "./forms/OccupationForm.tsx";
 export default function MrStepper({activeStep, peselOutput}: {
     activeStep: number,
-    peselOutput: PeselFormOutput | null
+    peselOutput: PeselFormOutput | null,
+    contactOutput: ContactFormOutput | null,
+    occupationOutput: OccupationFormOutput | null
 }) {
     return <Stepper activeStep={activeStep} orientation="vertical">
         <Step>
