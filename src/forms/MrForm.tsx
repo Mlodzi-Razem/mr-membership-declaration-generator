@@ -13,7 +13,7 @@ export type FormDescriptionSupplier<F extends FieldValues, O> = (
 ) => MrFormDescription;
 
 export default function MrForm<F extends FieldValues, O>(formDescSupplier: FormDescriptionSupplier<F, O>) {
-    return (props: { onSuccess: (output: O) => void }) => {
+    return (props: { onSuccess: (output: O) => void, onBack?: () => void }) => {
         // eslint-disable-next-line react-hooks/rules-of-hooks
         const form = useForm<F>();
         const {onSubmit, node} = formDescSupplier(form, props.onSuccess);
@@ -23,7 +23,7 @@ export default function MrForm<F extends FieldValues, O>(formDescSupplier: FormD
                 <Stack spacing={2}>
                     {node}
                 </Stack>
-
+                <Button type="button" color="error" disabled={!form.formState.isReady} onClick={() => props.onBack ? props.onBack() : form.reset()}>Wstecz</Button>
                 <Button type="submit" color="primary" disabled={!form.formState.isValid}>Dalej</Button>
             </Stack>
         </form>;

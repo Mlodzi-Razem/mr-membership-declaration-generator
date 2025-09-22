@@ -1,7 +1,6 @@
 import MrForm from "./MrForm.tsx";
 import MrField from "./MrField.tsx";
 import { Grid, TextField } from "@mui/material";
-
 type ContactFormFields = {
     formalName: string;
     formalLastName: string;
@@ -67,10 +66,10 @@ const ContactForm = MrForm<ContactFormFields, ContactFormOutput>((form, onSucces
                 <TextField {...register("pronouns", {required: false})}/>
             </MrField>
             <MrField label="Adres e-mail">
-                <TextField {...register("email", {required: false})}/>
+                <TextField {...register("email", {required: true})}/>
             </MrField>
             <MrField label="Numer telefonu">
-                <TextField {...register("phoneNumber", {required: false})}/>
+                <TextField {...register("phoneNumber", {required: true})}/>
             </MrField>
         </>
     };
