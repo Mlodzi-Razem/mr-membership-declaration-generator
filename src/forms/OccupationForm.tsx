@@ -130,7 +130,7 @@ function usePostalSuggestions(postalCode: string) {
 }
 
 // Extracted helper: derive and filter street suggestions from postalPlaces
-function useStreetSuggestions(postalPlaces: any[] | undefined, streetInput: string) {
+function useStreetSuggestions(postalPlaces: string[] | undefined, streetInput: string) {
     return React.useMemo(() => {
         if (!postalPlaces || postalPlaces.length === 0) return { all: [] as string[], filtered: [] as string[] };
         const names = postalPlaces
@@ -282,7 +282,7 @@ export const OccupationForm = MrForm<OccupationFormFields, OccupationFormOutput>
                 const rep = findRepresentativePostalMatch(postalPlaces);
                 if (mounted && rep) {
                     // apply city + voivodeship + district
-                    const cityName = (rep.miejscowosc ?? rep.nazwa ?? rep.name ?? rep.gmina ?? '').toString();
+                    const cityName = (rep.miejscowosc ?? '').toString();
                     if (cityName) setValue('city', cityName);
                     applyVoivodeshipPowiatMatch(rep);
                 }
