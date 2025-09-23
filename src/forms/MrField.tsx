@@ -1,12 +1,12 @@
-import type { FieldError } from "react-hook-form";
-import { Checkbox, FormControl, FormHelperText, FormLabel, Select, TextField } from "@mui/material";
+import type {FieldError} from "react-hook-form";
+import {Checkbox, FormControl, FormHelperText, FormLabel, Select, TextField} from "@mui/material";
 import * as React from "react";
 
-export default function MrField({label, fieldError, children}: {
+export default function MrField({label, fieldError, children}: Readonly<{
     fieldError?: FieldError,
     children: React.ReactElement<typeof TextField | typeof Checkbox | typeof Select>,
-    label: string
-}) {
+    label: React.ReactNode
+}>) {
     if (!children) {
         throw new Error("MrField must have children");
     }

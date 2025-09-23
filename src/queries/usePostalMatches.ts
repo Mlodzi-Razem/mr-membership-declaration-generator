@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import {useQuery} from "@tanstack/react-query";
 import useIsPostalCodeValid from "./useIsPostalCodeValid.ts";
 
 type CitiesApiResponse = ReadonlyArray<{
@@ -18,7 +18,11 @@ export interface PostalMatch {
     province: string;
 }
 
-export default function usePostalMatches(postalCode: string): PostalMatch[] {
+export type UsePostalMatchesResult = { loading: true, matches?: PostalMatch[] } | {
+    loading: false,
+    matches: PostalMatch[]
+}
+export default function usePostalMatches(postalCode: string): UsePostalMatchesResult {
     const isValid = useIsPostalCodeValid(postalCode);
 
     const queryResult = useQuery({
@@ -36,17 +40,22 @@ export default function usePostalMatches(postalCode: string): PostalMatch[] {
 
     if (queryResult.isError) {
         console.error('Error fetching cities:', queryResult.error);
-        return [];
+        return {loading: false, matches: []};
     }
 
-    if (queryResult.isLoading || !queryResult.data) {
-        return [];
+    if (queryResult.isLoading) {
+        return {loading: true};
+    }
+    if (!queryResult.data) {
+        return {loading: false, matches: []};
     }
 
-    return queryResult.data.map(element => ({
+    const matches = queryResult.data.map(element => ({
         city: element.miejscowosc,
         street: element.ulica,
         voivodeship: element.wojewodztwo,
         province: element.powiat
     }) as const);
+
+    return {loading: false, matches};
 }
