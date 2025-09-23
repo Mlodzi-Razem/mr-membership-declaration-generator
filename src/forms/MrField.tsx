@@ -13,7 +13,7 @@ export default function MrField({label, fieldError, children}: {
 
     const requiresHelperText = children.type === Checkbox;
 
-    return <FormControl error={!!fieldError}>
+    return <FormControl error={!!fieldError} style={{width: '100%'}}>
         <FormLabel>{label}</FormLabel>
         {requiresHelperText
             ? children

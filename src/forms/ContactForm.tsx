@@ -1,6 +1,7 @@
 import MrForm from "./MrForm.tsx";
 import MrField from "./MrField.tsx";
 import { Grid, TextField } from "@mui/material";
+
 type ContactFormFields = {
     formalName: string;
     formalLastName: string;
@@ -30,7 +31,7 @@ const ContactForm = MrForm<ContactFormFields, ContactFormOutput>((form, onSucces
             });
         },
         node: <>
-            <Grid container>
+            <Grid container spacing={2}>
                 <Grid size={6}>
                     <MrField label="Imię w dowodzie">
                         <TextField {...register("formalName", {required: true})}/>
@@ -43,7 +44,7 @@ const ContactForm = MrForm<ContactFormFields, ContactFormOutput>((form, onSucces
                 </Grid>
             </Grid>
 
-            <Grid container>
+            <Grid container spacing={2}>
                 <Grid size={6}>
                     <MrField label="Imię preferowane">
                         <TextField {...register(
