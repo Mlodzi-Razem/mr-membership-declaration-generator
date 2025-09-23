@@ -13,9 +13,7 @@ export default async function fillPdf(base64Data: string, fields: Map<FieldName,
     });
 
     form.flatten();
-
-    const pdfBytes = await document.save();
-
+    const pdfBytes = new Uint8Array(await document.save());
     return new Blob([pdfBytes], { type: 'application/pdf' });
 }
 

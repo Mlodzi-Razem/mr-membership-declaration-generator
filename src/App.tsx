@@ -5,6 +5,7 @@ import MrStepper from "./MrStepper.tsx";
 import ContactForm, { type ContactFormOutput } from "./forms/ContactForm.tsx";
 import AddressForm, { type OccupationFormOutput } from "./forms/AddressForm.tsx";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import GDPRConsentForm, { type GDPRConsentFormOutput } from "./forms/GDPRConsentForm.tsx";
 
 function ShowIf({step, equalTo, children}: { step: number, equalTo: number, children: React.ReactNode }) {
     return <div style={{display: step === equalTo ? 'block' : 'none', width: '100%', height: '100%'}}>
@@ -17,8 +18,9 @@ function App() {
     const [peselOutput, setPeselOutput] = useState<PeselFormOutput | null>(null);
     const [contactOutput, setContactOutput] = useState<ContactFormOutput | null>(null);
     const [occupationOutput, setOccupationOutput] = useState<OccupationFormOutput | null>(null);
+    const [GDPRConsentOutput, setGDPRConsentOutput] = useState<GDPRConsentFormOutput | null>(null);
     const queryClient = new QueryClient();
-
+    console.log(peselOutput);
     return (
         <QueryClientProvider client={queryClient}>
             <div style={{
@@ -29,14 +31,15 @@ function App() {
                 alignItems: 'center'
             }}>
                 <CssBaseline/>
-
+                
                 <Grid container spacing={2} style={{width: '100%', maxWidth: '60rem'}}>
                     <Grid size={4}>
                         <div style={{height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
                             <MrStepper activeStep={activeStep}
                                        peselOutput={peselOutput}
                                        contactOutput={contactOutput}
-                                       occupationOutput={occupationOutput}/>
+                                       occupationOutput={occupationOutput}
+                                       gdpr_consentOutput={GDPRConsentOutput}/>
                         </div>
                     </Grid>
                     <Grid size={8}>
@@ -57,18 +60,26 @@ function App() {
                         <ShowIf step={activeStep} equalTo={2}>
                             <AddressForm onSuccess={output => {
                                 setOccupationOutput(output);
-                                if (peselOutput?.requiresParentalConsent) {
                                     setActiveStep(3);
-                                } else {
-                                    setActiveStep(4);
-                                }
                             }} onBack={() => setActiveStep(1)}/>
+                        </ShowIf>
+
+                        <ShowIf step={activeStep} equalTo={3}>
+                            <GDPRConsentForm onSuccess={output => {
+                                setGDPRConsentOutput(output);
+                                setActiveStep(4)
+                            }} onBack={() => {
+                                setActiveStep(2);
+                            }} additionalProps={{isMinor : peselOutput?.requiresParentalConsent}}/>
                         </ShowIf>
                     </Grid>
                 </Grid>
+                
             </div>
         </QueryClientProvider>
+        
     )
+    
 }
 
 export default App

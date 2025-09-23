@@ -2,12 +2,14 @@ import { Step, StepLabel, Stepper } from "@mui/material";
 import type { PeselFormOutput } from "./forms/PeselForm.tsx";
 import type { ContactFormOutput } from "./forms/ContactForm.tsx";
 import type { OccupationFormOutput } from "./forms/AddressForm.tsx";
+import type { GDPRConsentFormOutput } from "./forms/GDPRConsentForm.tsx";
 
-export default function MrStepper({activeStep, peselOutput}: {
+export default function MrStepper({activeStep}: {
     activeStep: number,
     peselOutput: PeselFormOutput | null,
     contactOutput: ContactFormOutput | null,
-    occupationOutput: OccupationFormOutput | null
+    occupationOutput: OccupationFormOutput | null,
+    gdpr_consentOutput : GDPRConsentFormOutput | null
 }) {
     return <Stepper activeStep={activeStep} orientation="vertical">
         <Step>
@@ -20,14 +22,10 @@ export default function MrStepper({activeStep, peselOutput}: {
             <StepLabel>Miejsce zamieszkania i okręg</StepLabel>
         </Step>
         <Step>
-            <StepLabel>
-                <span style={{textDecoration: peselOutput?.requiresParentalConsent ? 'none' : 'line-through'}}>
-                    (Tylko małoletni) Zgoda rodzica
-                </span>
-            </StepLabel>
+            <StepLabel>Zgoda na przetwarzanie danych osobowych</StepLabel>
         </Step>
         <Step>
-            <StepLabel>Zgoda na przetwarzanie danych osobowych</StepLabel>
+            <StepLabel>Pobierz pliki</StepLabel>
         </Step>
     </Stepper>;
 }
