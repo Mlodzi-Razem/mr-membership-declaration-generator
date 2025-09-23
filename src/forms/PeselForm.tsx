@@ -1,8 +1,8 @@
-import type { FixedArray, NumberCharacter } from "../types.ts";
-import { DateTime } from "luxon";
-import { decodePesel, validatePesel } from "../pesel.ts";
+import type {FixedArray, NumberCharacter} from "../types.ts";
+import {DateTime} from "luxon";
+import {decodePesel, validatePesel} from "../pesel.ts";
 import MrField from "./MrField.tsx";
-import { TextField } from "@mui/material";
+import {TextField} from "@mui/material";
 import MrForm from "./MrForm.tsx";
 
 type PeselFormFields = {
@@ -29,8 +29,24 @@ function isParentalConsentRequired(birthDate: string): boolean {
     return DateTime.now().diff(parsedDate, 'years').years < 16;
 }
 
+const DATE_FORMAT = 'dd.MM.yyyy';
+
 const PeselForm = MrForm<PeselFormFields, PeselFormOutput>((form, onSuccess) => {
-    const {register, formState: {errors}, getValues} = form;
+    const {register, formState: {errors}, getValues, setValue} = form;
+
+    const onPeselInput = (e: {target: {value: string}}) => {
+        const pesel = e.target.value;
+        const birthDate = getValues('birthDate') ?? '';
+        const isValid = validatePesel(pesel);
+
+        if (isValid) {
+            const {birthDate: decodedBirthDate} = decodePesel(pesel);
+
+            if (birthDate === '') {
+                setValue('birthDate', decodedBirthDate.toFormat(DATE_FORMAT));
+            }
+        }
+    };
 
     return {
         onSubmit: () => {
@@ -51,15 +67,15 @@ const PeselForm = MrForm<PeselFormFields, PeselFormOutput>((form, onSuccess) => 
             onSuccess(output);
         },
         node: <>
-            <MrField label="Date urodzenia" fieldError={errors.birthDate}>
+            <MrField label="PESEL" fieldError={errors.pesel}>
+                <TextField onSelect={onPeselInput as never} {...register("pesel", {required: true, validate: peselValidate})}/>
+            </MrField>
+
+            <MrField label="Data urodzenia" fieldError={errors.birthDate}>
                 <TextField {...register(
                     "birthDate",
                     {required: true, validate: birthDateValidate}
                 )} placeholder="Np. 31.03.1999"/>
-            </MrField>
-
-            <MrField label="PESEL" fieldError={errors.pesel}>
-                <TextField {...register("pesel", {required: true, validate: peselValidate})}/>
             </MrField>
         </>
     }
@@ -67,7 +83,7 @@ const PeselForm = MrForm<PeselFormFields, PeselFormOutput>((form, onSuccess) => 
 export default PeselForm;
 
 function parseDate(dateString: string) {
-    return DateTime.fromFormat(dateString, "dd.MM.yyyy");
+    return DateTime.fromFormat(dateString, DATE_FORMAT);
 }
 
 function birthDateValidate(dateString: string) {

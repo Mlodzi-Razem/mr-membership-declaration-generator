@@ -1,13 +1,17 @@
-import { DateTime } from "luxon";
+import {DateTime} from "luxon";
 
-const weight = [1, 3, 7, 9, 1, 3, 7, 9, 1, 3];
+const WEIGHTS = [1, 3, 7, 9, 1, 3, 7, 9, 1, 3];
 
-export function validatePesel(pesel: string): boolean {
+export function validatePesel(pesel: string | undefined | null): pesel is string {
+    if (pesel === undefined || pesel === null || pesel.length !== 11) {
+        return false;
+    }
+
     const controlNumber = parseInt(pesel.substring(10, 11));
 
     let sum = 0;
-    for (let i = 0; i < weight.length; i++) {
-        sum += (parseInt(pesel.substring(i, i + 1)) * weight[i]);
+    for (let i = 0; i < WEIGHTS.length; i++) {
+        sum += (parseInt(pesel.substring(i, i + 1)) * WEIGHTS[i]);
     }
     sum = sum % 10;
     return (10 - sum) % 10 === controlNumber;
