@@ -1,10 +1,6 @@
-import { Step, StepLabel, Stepper } from "@mui/material";
-import type { PeselFormOutput } from "./forms/PeselForm.tsx";
+import {Step, StepLabel, Stepper} from "@mui/material";
 
-export default function MrStepper({activeStep, peselOutput}: {
-    activeStep: number,
-    peselOutput: PeselFormOutput | null
-}) {
+export default function MrStepper({activeStep}: Readonly<{ activeStep: number }>) {
     return <Stepper activeStep={activeStep} orientation="vertical">
         <Step>
             <StepLabel>Data urodzenia i PESEL</StepLabel>
@@ -16,14 +12,10 @@ export default function MrStepper({activeStep, peselOutput}: {
             <StepLabel>Miejsce zamieszkania i okręg</StepLabel>
         </Step>
         <Step>
-            <StepLabel>
-                <span style={{textDecoration: peselOutput?.requiresParentalConsent ? 'none' : 'line-through'}}>
-                    (Tylko małoletni) Zgoda rodzica
-                </span>
-            </StepLabel>
+            <StepLabel>Zgoda na przetwarzanie danych osobowych</StepLabel>
         </Step>
         <Step>
-            <StepLabel>Zgoda na przetwarzanie danych osobowych</StepLabel>
+            <StepLabel>Pobierz pliki</StepLabel>
         </Step>
     </Stepper>;
 }

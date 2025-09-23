@@ -31,7 +31,7 @@ const ContactForm = MrForm<ContactFormFields, ContactFormOutput>((form, onSucces
             });
         },
         node: <>
-            <Grid container>
+            <Grid container spacing={2}>
                 <Grid size={6}>
                     <MrField label="Imię w dowodzie">
                         <TextField {...register("formalName", {required: true})}/>
@@ -44,7 +44,7 @@ const ContactForm = MrForm<ContactFormFields, ContactFormOutput>((form, onSucces
                 </Grid>
             </Grid>
 
-            <Grid container>
+            <Grid container spacing={2}>
                 <Grid size={6}>
                     <MrField label="Imię preferowane">
                         <TextField {...register(
@@ -67,10 +67,10 @@ const ContactForm = MrForm<ContactFormFields, ContactFormOutput>((form, onSucces
                 <TextField {...register("pronouns", {required: false})}/>
             </MrField>
             <MrField label="Adres e-mail">
-                <TextField {...register("email", {required: false})}/>
+                <TextField {...register("email", {required: true})}/>
             </MrField>
             <MrField label="Numer telefonu">
-                <TextField {...register("phoneNumber", {required: false})}/>
+                <TextField {...register("phoneNumber", {required: true})}/>
             </MrField>
         </>
     };

@@ -1,19 +1,19 @@
-import type { FieldError } from "react-hook-form";
-import { Checkbox, FormControl, FormHelperText, FormLabel, Select, TextField } from "@mui/material";
+import type {FieldError} from "react-hook-form";
+import {Checkbox, FormControl, FormHelperText, FormLabel, Select, TextField} from "@mui/material";
 import * as React from "react";
 
-export default function MrField({label, fieldError, children}: {
+export default function MrField({label, fieldError, children}: Readonly<{
     fieldError?: FieldError,
     children: React.ReactElement<typeof TextField | typeof Checkbox | typeof Select>,
-    label: string
-}) {
+    label: React.ReactNode
+}>) {
     if (!children) {
         throw new Error("MrField must have children");
     }
 
     const requiresHelperText = children.type === Checkbox;
 
-    return <FormControl error={!!fieldError}>
+    return <FormControl error={!!fieldError} style={{width: '100%'}}>
         <FormLabel>{label}</FormLabel>
         {requiresHelperText
             ? children
@@ -24,3 +24,5 @@ export default function MrField({label, fieldError, children}: {
         {fieldError && requiresHelperText && <FormHelperText>{fieldError.message}</FormHelperText>}
     </FormControl>
 }
+
+// brought the original version, no need for changes in MrField since the MrAutocomplete.tsx was created
