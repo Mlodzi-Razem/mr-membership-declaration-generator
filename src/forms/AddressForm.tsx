@@ -17,6 +17,7 @@ type AddressFormFields = {
     voivodeship: string;
     district: string;
     province: string;
+    school : string;
 };
 export type AddressFormOutput = AddressFormFields;
 
@@ -126,6 +127,7 @@ export const AddressForm = MrForm<AddressFormFields, AddressFormOutput>((form, o
         setValue('district', '');
         setValue('street', '');
         setValue('buildingNumber', '');
+        setValue('school', '');
         setValue('apartmentNumber', '');
     }, [setValue]);
     return {
@@ -210,6 +212,11 @@ export const AddressForm = MrForm<AddressFormFields, AddressFormOutput>((form, o
                 <Grid size={3}>
                     <MrField label="Numer lokalu">
                         <TextField{...register("apartmentNumber", {required: false})}/>
+                    </MrField>
+                </Grid>
+                <Grid size={12}>
+                    <MrField label="Nazwa szkoły (jeżeli uczęszczasz)">
+                        <TextField {...register("school", {required:false})}/>
                     </MrField>
                 </Grid>
             </Grid>

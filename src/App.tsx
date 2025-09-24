@@ -10,6 +10,7 @@ import GdprConsentForm, {type GdprConsentFormOutput} from "./forms/GdprConsentFo
 import {PersistQueryClientProvider} from '@tanstack/react-query-persist-client'
 import {createAsyncStoragePersister} from '@tanstack/query-async-storage-persister'
 import DownloadFilesView from "./DownloadFilesView.tsx";
+import "./App.css"
 
 function ShowIf({step, equalTo, children}: Readonly<{ step: number, equalTo: number, children: React.ReactNode }>) {
     const display = step === equalTo ? 'block' : 'none';
@@ -48,9 +49,9 @@ function App() {
                 display: 'flex',
                 justifyContent: 'center',
                 alignItems: 'center'
-            }}>
+            }} className="container">
                 <CssBaseline/>
-
+                <img src="src/assets/logo.png" alt="Logo Młodych Razem" className="site-logo"/>
                 <Grid container spacing={2} style={{width: '100%', maxWidth: '60rem'}}>
                     <Grid size={4}>
                         <div style={{height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>

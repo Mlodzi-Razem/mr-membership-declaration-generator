@@ -38,7 +38,7 @@ function fillDeclaration(context: DownloadFilesContext): Promise<Blob> {
         ['Adres_e_mail', context.contactOutput.email],
         ['Wojewodztwo', context.addressOutput.voivodeship],
         ...districtFields,
-        ['Uczelnia_Szkola', ''],
+        ['Uczelnia_Szkola', context.addressOutput.school],
         ['Kod_pocztowy', context.addressOutput.postalCode],
         ['Miejscowosc', context.addressOutput.city],
         ['Powiat', context.addressOutput.province],

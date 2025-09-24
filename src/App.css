@@ -1,0 +1,23 @@
+.container {
+background: #EFEFEF;
+background: linear-gradient(25deg,rgba(239, 239, 239, 1) 0%, rgba(224, 224, 224, 1) 77%, rgba(239, 239, 239, 1) 92%);
+}
+.container > :last-child {
+    background: #ffffff;
+    padding-inline: 2%;
+    padding-top:2%; padding-bottom: 2%;
+    border-radius: 20px;
+    margin: 2%;
+}
+.site-logo {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 96px;
+  height: auto;
+  pointer-events: none;
+  opacity: 0.95;
+  content: '\F0607';
+  padding: 0%;
+}
+
