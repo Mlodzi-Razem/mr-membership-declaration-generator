@@ -31,7 +31,7 @@ function isParentalConsentRequired(birthDate: string): boolean {
 
 const DATE_FORMAT = 'dd.MM.yyyy';
 
-const PeselForm = MrForm<PeselFormFields, PeselFormOutput>((form, onSuccess) => {
+const PeselForm = MrForm<PeselFormFields, PeselFormOutput>('pesel', (form, onSuccess) => {
     const {register, formState: {errors}, getValues, setValue} = form;
 
     const onPeselInput = (e: {target: {value: string}}) => {

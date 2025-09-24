@@ -15,7 +15,7 @@ export type ContactFormOutput = ContactFormFields;
 
 const isBlank = (s: string): boolean => !s || s.trim() === '';
 
-const ContactForm = MrForm<ContactFormFields, ContactFormOutput>((form, onSuccess) => {
+const ContactForm = MrForm<ContactFormFields, ContactFormOutput>('contact', (form, onSuccess) => {
     const {register, watch, getValues} = form;
 
     const currentValues = watch();

@@ -17,7 +17,7 @@ type AddressFormFields = {
     voivodeship: string;
     district: string;
     province: string;
-    school : string;
+    school: string;
 };
 export type AddressFormOutput = AddressFormFields;
 
@@ -85,7 +85,7 @@ function useSuggestedValues(args: {
     }, [suggestedCities[0], suggestedVoivodeships[0], suggestedStreets[0], suggestedProvinces[0], setValue, getValues, trySetDistrict]);
 }
 
-export const AddressForm = MrForm<AddressFormFields, AddressFormOutput>((form, onSuccess) => {
+export const AddressForm = MrForm<AddressFormFields, AddressFormOutput>('address', (form, onSuccess) => {
     const {register, watch, getValues, formState: {errors}, getFieldState, setValue} = form;
 
     const districtLookup = useDistrictLookup();
@@ -216,7 +216,7 @@ export const AddressForm = MrForm<AddressFormFields, AddressFormOutput>((form, o
                 </Grid>
                 <Grid size={12}>
                     <MrField label="Nazwa szkoły (jeżeli uczęszczasz)">
-                        <TextField {...register("school", {required:false})}/>
+                        <TextField {...register("school", {required: false})}/>
                     </MrField>
                 </Grid>
             </Grid>

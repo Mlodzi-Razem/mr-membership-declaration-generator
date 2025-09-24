@@ -1,6 +1,9 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 import {type FieldValues, useForm, type UseFormReturn} from "react-hook-form";
 import * as React from "react";
+import {useEffect, useRef} from "react";
 import {Button, Grid, Stack} from "@mui/material";
+import useFormPersist from "react-hook-form-persist";
 
 export interface MrFormDescription {
     onSubmit: () => void;
@@ -20,13 +23,38 @@ export type MrFormBaseProps<O, AdditionalProps> = {
     ? { additionalProps?: AdditionalProps }
     : { additionalProps: AdditionalProps });
 
-export default function MrForm<F extends FieldValues, O, AdditionalProps = undefined>(formDescSupplier: FormDescriptionSupplier<F, O, AdditionalProps>) {
-    return (props: MrFormBaseProps<O, AdditionalProps>) => { // CHANGE HERE
-        // eslint-disable-next-line react-hooks/rules-of-hooks
-        const form = useForm<F>();
+function useTriggerFormOnResize<F extends FieldValues, TFieldValues>(formRef: React.RefObject<HTMLFormElement | null>, form: UseFormReturn<F, unknown, TFieldValues>) {
+    useEffect(() => {
+        if (formRef.current) {
+            const {width: initialWidth, height: initialHeight} = formRef.current.getBoundingClientRect();
+            const resizeObserver = new ResizeObserver(([resizedForm]) => {
+                const currentBoundingRect = resizedForm.target.getBoundingClientRect();
+                if (currentBoundingRect.width !== initialWidth || currentBoundingRect.height !== initialHeight) {
+                    form.trigger();
+                }
+            });
+            resizeObserver.observe(formRef.current);
+            return () => resizeObserver.disconnect();
+        }
+    }, [formRef, form]);
+}
+
+export default function MrForm<F extends FieldValues, O, AdditionalProps = undefined>(formKey: string, formDescSupplier: FormDescriptionSupplier<F, O, AdditionalProps>) {
+    return (props: MrFormBaseProps<O, AdditionalProps>) => {
+        const form = useForm<F>({mode: 'all',});
+
+        useFormPersist(formKey, {
+            watch: form.watch,
+            setValue: form.setValue,
+            storage: window.sessionStorage
+        });
+
+        const formRef = useRef<HTMLFormElement>(null);
+        useTriggerFormOnResize(formRef, form);
+
         const {onSubmit, node} = formDescSupplier(form, props.onSuccess, props.additionalProps as AdditionalProps);
 
-        return <form onSubmit={form.handleSubmit(onSubmit)} style={{height: '100%'}}>
+        return <form onSubmit={form.handleSubmit(onSubmit)} style={{height: '100%'}} ref={formRef}>
             <Stack spacing={2} justifyContent="space-between" style={{height: '100%'}}>
                 <Stack spacing={2}>
                     {node}

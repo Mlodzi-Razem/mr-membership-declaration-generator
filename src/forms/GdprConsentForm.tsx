@@ -12,7 +12,7 @@ type GdprConsentFormFields =
     }
 export type GdprConsentFormOutput = GdprConsentFormFields;
 
-const GdprConsentForm = MrForm<GdprConsentFormFields, GdprConsentFormOutput, GdprConsentFormProps>((form, onSuccess, {isMinor}) => {
+const GdprConsentForm = MrForm<GdprConsentFormFields, GdprConsentFormOutput, GdprConsentFormProps>('gdpr-consent', (form, onSuccess, {isMinor}) => {
         const {register, getValues} = form;
         return {
             onSubmit: () => {
@@ -27,9 +27,8 @@ const GdprConsentForm = MrForm<GdprConsentFormFields, GdprConsentFormOutput, Gdp
                             <ListItemIcon>
                                 <ArrowCircleRightIcon/>
                             </ListItemIcon>
-                            <MrField
-                                label={<>utrwalenie i publikację mojego wizerunku na stronach internetowych, w prasie, w
-                                    mediach społecznościowych przez Stowarzyszenie.</>}>
+                            <MrField label={<>utrwalenie i publikację mojego wizerunku na stronach internetowych,
+                                w prasie, w mediach społecznościowych przez Stowarzyszenie.</>}>
                                 <Checkbox {...register("publishingImageConsent")}/>
                             </MrField>
                         </ListItem>
@@ -43,7 +42,7 @@ const GdprConsentForm = MrForm<GdprConsentFormFields, GdprConsentFormOutput, Gdp
                                         przetwarzanie moich danych osobowych obejmujących dane szczególnej kategorii, w tym
                                         dotyczące preferowanego imienia, nazwiska, płci i poglądów politycznych.
                                     </>}>
-                                    <Checkbox {...register("processingDataConsent", {required: true})}/>
+                                    <Checkbox {...register("processingDataConsent", {required: true})} />
                                 </MrField>
                             </ListItem>
                         </Tooltip>
