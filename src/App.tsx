@@ -1,6 +1,5 @@
 import PeselForm, {type PeselFormOutput} from "./forms/PeselForm.tsx";
 import {CssBaseline, Grid, Stack} from "@mui/material";
-import * as React from "react";
 import {useState} from "react";
 import MrStepper from "./MrStepper.tsx";
 import ContactForm, {type ContactFormOutput} from "./forms/ContactForm.tsx";
@@ -13,14 +12,6 @@ import DownloadFilesView from "./DownloadFilesView.tsx";
 import styles from "./App.module.css"
 import useIsMobile from "./queries/useIsMobile.ts";
 import useStorageValue from "./useStorageValue.ts";
-
-function ShowIf({step, equalTo, children}: Readonly<{ step: number, equalTo: number, children: React.ReactNode }>) {
-    const display = step === equalTo ? 'block' : 'none';
-
-    return <div style={{display, width: '100%', height: '100%'}}>
-        {children}
-    </div>
-}
 
 const HOURS_24_MILLIS = 24 * 60 * 60 * 1000;
 const queryClient = new QueryClient({
@@ -36,7 +27,7 @@ const storagePersister = createAsyncStoragePersister({
     key: 'mr-membership-declaration-generator-query',
 })
 
-const AppForms = ({activeStep, setActiveStep}: {activeStep: number, setActiveStep: (step: number) => void}) => {
+const AppForms = ({activeStep, setActiveStep}: { activeStep: number, setActiveStep: (step: number) => void }) => {
     const [storageState, setStorageState] = useStorageValue<{
         peselOutput?: PeselFormOutput,
         contactOutput?: ContactFormOutput,
@@ -46,35 +37,35 @@ const AppForms = ({activeStep, setActiveStep}: {activeStep: number, setActiveSte
     const {peselOutput, gdprFormOutput, contactOutput, addressOutput} = storageState;
 
     return <>
-        <ShowIf step={activeStep} equalTo={0}>
+        {activeStep === 0 &&
             <PeselForm onSuccess={output => {
                 setStorageState({...storageState, peselOutput: output});
                 setActiveStep(1);
             }}/>
-        </ShowIf>
+        }
 
-        <ShowIf step={activeStep} equalTo={1}>
+        {activeStep === 1 &&
             <ContactForm onSuccess={output => {
                 setStorageState({...storageState, contactOutput: output});
                 setActiveStep(2);
             }} onBack={() => setActiveStep(0)}/>
-        </ShowIf>
+        }
 
-        <ShowIf step={activeStep} equalTo={2}>
+        {activeStep === 2 &&
             <AddressForm onSuccess={output => {
                 setStorageState({...storageState, addressOutput: output});
                 setActiveStep(3);
             }} onBack={() => setActiveStep(1)}/>
-        </ShowIf>
+        }
 
-        <ShowIf step={activeStep} equalTo={3}>
+        {activeStep === 3 &&
             <GdprConsentForm onSuccess={output => {
                 setStorageState({...storageState, gdprFormOutput: output});
                 setActiveStep(4)
             }} onBack={() => {
                 setActiveStep(2);
             }} additionalProps={{isMinor: !!peselOutput?.requiresParentalConsent}}/>
-        </ShowIf>
+        }
 
         {activeStep === 4 &&
             <DownloadFilesView context={{
