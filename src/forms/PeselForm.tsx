@@ -44,7 +44,6 @@ const PeselForm = MrForm<PeselFormFields, PeselFormOutput>('pesel', (form, onSuc
 
             if (birthDate === '') {
                 setValue('birthDate', decodedBirthDate.toFormat(DATE_FORMAT));
-                form.trigger();
             }
         }
     };
