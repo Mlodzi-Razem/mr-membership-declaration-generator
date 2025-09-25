@@ -1,6 +1,7 @@
 import MrForm from "./MrForm.tsx";
 import MrField from "./MrField.tsx";
 import { Grid, TextField } from "@mui/material";
+import useIsMobile from "../queries/useIsMobile.ts";
 
 type ContactFormFields = {
     formalName: string;
@@ -17,6 +18,7 @@ const isBlank = (s: string): boolean => !s || s.trim() === '';
 
 const ContactForm = MrForm<ContactFormFields, ContactFormOutput>('contact', (form, onSuccess) => {
     const {register, watch, getValues} = form;
+    const isMobile = useIsMobile();
 
     const currentValues = watch();
 
@@ -32,12 +34,12 @@ const ContactForm = MrForm<ContactFormFields, ContactFormOutput>('contact', (for
         },
         node: <>
             <Grid container spacing={2}>
-                <Grid size={6}>
+                <Grid size={isMobile ? 12 : 6}>
                     <MrField label="Imię w dowodzie">
                         <TextField {...register("formalName", {required: true})}/>
                     </MrField>
                 </Grid>
-                <Grid size={6}>
+                <Grid size={isMobile ? 12 : 6}>
                     <MrField label="Nazwisko w dowodzie">
                         <TextField {...register("formalLastName", {required: true})}/>
                     </MrField>
@@ -45,7 +47,7 @@ const ContactForm = MrForm<ContactFormFields, ContactFormOutput>('contact', (for
             </Grid>
 
             <Grid container spacing={2}>
-                <Grid size={6}>
+                <Grid size={isMobile ? 12 : 6}>
                     <MrField label="Imię preferowane">
                         <TextField {...register(
                             "preferredName",
@@ -53,7 +55,7 @@ const ContactForm = MrForm<ContactFormFields, ContactFormOutput>('contact', (for
                         )} placeholder={currentValues.formalName}/>
                     </MrField>
                 </Grid>
-                <Grid size={6}>
+                <Grid size={isMobile ? 12 : 6}>
                     <MrField label="Nazwisko preferowane">
                         <TextField {...register(
                             "preferredLastName",

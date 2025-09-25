@@ -1,6 +1,6 @@
 import {useEffect, useState} from "react";
 
-const MOBILE_WIDTH = 900;
+const MOBILE_WIDTH = 1024;
 
 export default function useIsMobile() {
     const [mobile, setMobile] = useState(window.innerWidth < MOBILE_WIDTH);
@@ -9,9 +9,9 @@ export default function useIsMobile() {
         const abortController = new AbortController();
 
         window.addEventListener("resize", () => {
-            if (mobile && window.innerWidth >= MOBILE_WIDTH) {
+            if (mobile && window.innerWidth > MOBILE_WIDTH) {
                 setMobile(false);
-            } else if (!mobile && window.innerWidth < MOBILE_WIDTH) {
+            } else if (!mobile && window.innerWidth <= MOBILE_WIDTH) {
                 setMobile(true);
             }
         }, {signal: abortController.signal});

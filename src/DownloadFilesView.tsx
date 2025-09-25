@@ -15,7 +15,9 @@ export default function DownloadFilesView({context}: Readonly<{ context: Downloa
     const [storageValue, setStorageValue] = useStorageValue('downloadedAlready', {downloadedAlready: false}); // to preserve the value even if the component gets remounted elsewhere (ex. during window resize)
 
     const downloadFiles = useCallback(async () => {
-        setStorageValue({downloadedAlready: true});
+        if (!storageValue.downloadedAlready) {
+            setStorageValue({downloadedAlready: true});
+        }
 
         const declaration = await fillDeclaration(context);
         const gdprDeclaration = await fillGdprDeclaration(context);

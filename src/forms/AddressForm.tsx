@@ -7,6 +7,7 @@ import distinct from "../distinct.ts";
 import useDistrictLookup from "../queries/useDistrictLookup.ts";
 import {useCallback, useEffect} from "react";
 import type {UseFormGetValues, UseFormSetValue} from "react-hook-form";
+import useIsMobile from "../queries/useIsMobile.ts";
 
 type AddressFormFields = {
     postalCode: string;
@@ -87,6 +88,7 @@ function useSuggestedValues(args: {
 
 export const AddressForm = MrForm<AddressFormFields, AddressFormOutput>('address', (form, onSuccess) => {
     const {register, watch, getValues, formState: {errors}, getFieldState, setValue} = form;
+    const isMobile = useIsMobile();
 
     const districtLookup = useDistrictLookup();
 
@@ -94,6 +96,7 @@ export const AddressForm = MrForm<AddressFormFields, AddressFormOutput>('address
     const city = watch('city') ?? '';
     const street = watch('street') ?? '';
     const voivodeship = watch('voivodeship') ?? '';
+    const province = watch('province') ?? '';
 
     const usePostalMatchesResult = usePostalMatches(postal);
     const postalMatches = usePostalMatchesResult.matches ?? [];
@@ -141,7 +144,7 @@ export const AddressForm = MrForm<AddressFormFields, AddressFormOutput>('address
                 <CircularProgress color='inherit'/>
             </Backdrop>
             <Grid container spacing={2}>
-                <Grid size={3}>
+                <Grid size={isMobile ? 12 : 3}>
                     <MrField label="Kod pocztowy" fieldError={errors.postalCode}>
                         <TextField {...register("postalCode", {
                             required: true,
@@ -150,7 +153,7 @@ export const AddressForm = MrForm<AddressFormFields, AddressFormOutput>('address
                     </MrField>
                 </Grid>
 
-                <Grid size={9}>
+                <Grid size={isMobile ? 12 : 9}>
                     <MrField label="Miasto">
                         <MrAutocomplete
                             name="city"
@@ -167,23 +170,25 @@ export const AddressForm = MrForm<AddressFormFields, AddressFormOutput>('address
             </Grid>
 
             <Grid container spacing={2}>
-                <Grid size={5}>
+                <Grid size={isMobile ? 12 : 5}>
                     <MrField label="Województwo">
                         <MrAutocomplete name="voivodeship"
                                         disabled={getFieldState('postalCode').invalid}
                                         control={form.control}
                                         options={suggestedVoivodeships}
                                         value={voivodeship}
-                                        inputProps={{...register("voivodeship", {required: true})}}
-                                        sx={{width: '100%'}}/>
+                                        inputProps={{...register("voivodeship", {required: true})}}/>
                     </MrField>
                 </Grid>
-                <Grid size={4}>
+                <Grid size={isMobile ? 6 : 4}>
                     <MrField label='Powiat'>
-                        <MrAutocomplete name='province' control={form.control} options={suggestedProvinces}/>
+                        <MrAutocomplete value={province}
+                                        name='province'
+                                        control={form.control} options={suggestedProvinces}
+                                        inputProps={{...register("province", {required: true})}}/>
                     </MrField>
                 </Grid>
-                <Grid size={3}>
+                <Grid size={isMobile ? 6 : 3}>
                     <MrField label="Okręg wyborczy">
                         <TextField disabled={city === ''} {...register("district", {required: true})}/>
                     </MrField>
@@ -191,7 +196,7 @@ export const AddressForm = MrForm<AddressFormFields, AddressFormOutput>('address
             </Grid>
 
             <Grid container spacing={2}>
-                <Grid size={5}>
+                <Grid size={isMobile ? 12 : 5}>
                     <MrField label="Ulica">
                         <MrAutocomplete
                             name="street"
@@ -204,12 +209,12 @@ export const AddressForm = MrForm<AddressFormFields, AddressFormOutput>('address
                         />
                     </MrField>
                 </Grid>
-                <Grid size={4}>
+                <Grid size={isMobile ? 6 : 4}>
                     <MrField label="Numer budynku">
                         <TextField disabled={street === ''} {...register("buildingNumber", {required: true})}/>
                     </MrField>
                 </Grid>
-                <Grid size={3}>
+                <Grid size={isMobile ? 6 : 3}>
                     <MrField label="Numer lokalu">
                         <TextField{...register("apartmentNumber", {required: false})}/>
                     </MrField>

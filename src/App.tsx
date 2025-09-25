@@ -1,5 +1,5 @@
 import PeselForm, {type PeselFormOutput} from "./forms/PeselForm.tsx";
-import {CssBaseline, Grid, Stack} from "@mui/material";
+import {CssBaseline, Grid} from "@mui/material";
 import {useState} from "react";
 import MrStepper from "./MrStepper.tsx";
 import ContactForm, {type ContactFormOutput} from "./forms/ContactForm.tsx";
@@ -9,7 +9,7 @@ import GdprConsentForm, {type GdprConsentFormOutput} from "./forms/GdprConsentFo
 import {PersistQueryClientProvider} from '@tanstack/react-query-persist-client'
 import {createAsyncStoragePersister} from '@tanstack/query-async-storage-persister'
 import DownloadFilesView from "./DownloadFilesView.tsx";
-import styles from "./App.module.css"
+import styles from "./App.module.less"
 import useIsMobile from "./queries/useIsMobile.ts";
 import useStorageValue from "./useStorageValue.ts";
 
@@ -82,25 +82,18 @@ function App() {
     const isMobile = useIsMobile();
     const [activeStep, setActiveStep] = useState(0);
 
-
-    const formsFragment = <AppForms activeStep={activeStep} setActiveStep={setActiveStep}/>
-
     return (
         <PersistQueryClientProvider client={queryClient} persistOptions={{persister: storagePersister}}>
             <div className={styles.container}>
                 <CssBaseline/>
-                <Grid container spacing={2} style={{width: '100%', maxWidth: '80rem'}}>
+                <Grid container spacing={2} style={{width: '100%', maxWidth: '80rem', height: '100%'}}>
                     {!isMobile && <Grid size={4}>
                         <div style={{height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
-                            <MrStepper activeStep={activeStep} orientation='vertical'/>
+                            <MrStepper activeStep={activeStep}/>
                         </div>
                     </Grid>}
                     <Grid size={isMobile ? 12 : 8}>
-                        {isMobile && <Stack spacing={2}>
-                            {formsFragment}
-                            <MrStepper activeStep={activeStep} orientation={'horizontal'}/>
-                        </Stack>}
-                        {!isMobile && formsFragment}
+                        <AppForms activeStep={activeStep} setActiveStep={setActiveStep}/>
                     </Grid>
                 </Grid>
             </div>

@@ -1,6 +1,6 @@
 import {Step, StepLabel, Stepper} from "@mui/material";
 
-const StepperLabels = [
+export const StepperLabels = [
     'Data urodzenia i PESEL',
     'Dane kontaktowe',
     'Miejsce zamieszkania i okręg',
@@ -8,8 +8,8 @@ const StepperLabels = [
     'Pobierz pliki'
 ] as const;
 
-export default function MrStepper({activeStep, orientation}: Readonly<{ activeStep: number, orientation: 'vertical' | 'horizontal' }>) {
-    return <Stepper activeStep={activeStep} orientation={orientation} alternativeLabel={orientation === 'horizontal'}>
+export default function MrStepper({activeStep}: Readonly<{ activeStep: number}>) {
+    return <Stepper activeStep={activeStep} orientation='vertical'>
         {StepperLabels.map(label => <Step key={label}>
             <StepLabel>{label}</StepLabel>
         </Step>)}
