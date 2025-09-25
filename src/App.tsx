@@ -40,7 +40,6 @@ const AppForms = ({activeStep, setActiveStep}: {activeStep: number, setActiveSte
     const [contactOutput, setContactOutput] = useState<ContactFormOutput | null>(null);
     const [addressOutput, setAddressOutput] = useState<AddressFormOutput | null>(null);
     const [gdprFormOutput, setGdprFormOutput] = useState<GdprConsentFormOutput | null>(null);
-    const allFormsFilled = peselOutput && contactOutput && addressOutput && gdprFormOutput;
 
     return <>
         <ShowIf step={activeStep} equalTo={0}>
@@ -73,13 +72,12 @@ const AppForms = ({activeStep, setActiveStep}: {activeStep: number, setActiveSte
             }} additionalProps={{isMinor: !!peselOutput?.requiresParentalConsent}}/>
         </ShowIf>
 
-        {
-            activeStep === 4 && allFormsFilled &&
+        {activeStep === 4 &&
             <DownloadFilesView context={{
-                peselOutput,
-                contactOutput,
-                addressOutput,
-                gdprFormOutput
+                peselOutput: peselOutput!,
+                contactOutput: contactOutput!,
+                addressOutput: addressOutput!,
+                gdprFormOutput: gdprFormOutput!
             }}/>
         }
     </>;

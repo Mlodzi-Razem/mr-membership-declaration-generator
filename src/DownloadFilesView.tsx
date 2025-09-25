@@ -2,19 +2,20 @@ import {Link, Stack, Typography} from "@mui/material";
 
 
 import saveBlob from "./save-blob.ts";
-import {useCallback, useEffect, useState} from "react";
+import {useCallback, useEffect} from "react";
 import {
     type DownloadFilesContext,
     fillDeclaration,
     fillGdprDeclaration,
     fillParentalConsentForm
 } from "./fill-documents.ts";
+import useStorageValue from "./useStorageValue.ts";
 
 export default function DownloadFilesView({context}: Readonly<{ context: DownloadFilesContext }>) {
-    const [downloadedAlready, setDownloadedAlready] = useState(false);
+    const [storageValue, setStorageValue] = useStorageValue('downloadedAlready', {downloadedAlready: false}); // to preserve the value even if the component gets remounted elsewhere (ex. during window resize)
 
     const downloadFiles = useCallback(async () => {
-        setDownloadedAlready(true);
+        setStorageValue({downloadedAlready: true});
 
         const declaration = await fillDeclaration(context);
         const gdprDeclaration = await fillGdprDeclaration(context);
@@ -26,14 +27,14 @@ export default function DownloadFilesView({context}: Readonly<{ context: Downloa
             const parentalConsent = await fillParentalConsentForm(context);
             saveBlob(parentalConsent, 'MR-Zgoda-rodzica.pdf');
         }
-    }, [context, setDownloadedAlready]);
+    }, [context, setStorageValue]);
 
 
     useEffect(() => {
-        if (downloadedAlready) return;
+        if (storageValue.downloadedAlready) return;
 
         downloadFiles();
-    }, [downloadedAlready, downloadFiles])
+    }, [storageValue.downloadedAlready, downloadFiles])
 
     return <Stack spacing={2}>
         <Typography variant='h4'>Gratulacje!</Typography>
