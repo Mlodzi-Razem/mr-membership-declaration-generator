@@ -12,6 +12,7 @@ import {createAsyncStoragePersister} from '@tanstack/query-async-storage-persist
 import DownloadFilesView from "./DownloadFilesView.tsx";
 import styles from "./App.module.css"
 import useIsMobile from "./queries/useIsMobile.ts";
+import useStorageValue from "./useStorageValue.ts";
 
 function ShowIf({step, equalTo, children}: Readonly<{ step: number, equalTo: number, children: React.ReactNode }>) {
     const display = step === equalTo ? 'block' : 'none';
@@ -36,36 +37,39 @@ const storagePersister = createAsyncStoragePersister({
 })
 
 const AppForms = ({activeStep, setActiveStep}: {activeStep: number, setActiveStep: (step: number) => void}) => {
-    const [peselOutput, setPeselOutput] = useState<PeselFormOutput | null>(null);
-    const [contactOutput, setContactOutput] = useState<ContactFormOutput | null>(null);
-    const [addressOutput, setAddressOutput] = useState<AddressFormOutput | null>(null);
-    const [gdprFormOutput, setGdprFormOutput] = useState<GdprConsentFormOutput | null>(null);
+    const [storageState, setStorageState] = useStorageValue<{
+        peselOutput?: PeselFormOutput,
+        contactOutput?: ContactFormOutput,
+        addressOutput?: AddressFormOutput,
+        gdprFormOutput?: GdprConsentFormOutput,
+    }>('appFormsValues', {});
+    const {peselOutput, gdprFormOutput, contactOutput, addressOutput} = storageState;
 
     return <>
         <ShowIf step={activeStep} equalTo={0}>
             <PeselForm onSuccess={output => {
-                setPeselOutput(output);
+                setStorageState({...storageState, peselOutput: output});
                 setActiveStep(1);
             }}/>
         </ShowIf>
 
         <ShowIf step={activeStep} equalTo={1}>
             <ContactForm onSuccess={output => {
-                setContactOutput(output);
+                setStorageState({...storageState, contactOutput: output});
                 setActiveStep(2);
             }} onBack={() => setActiveStep(0)}/>
         </ShowIf>
 
         <ShowIf step={activeStep} equalTo={2}>
             <AddressForm onSuccess={output => {
-                setAddressOutput(output);
+                setStorageState({...storageState, addressOutput: output});
                 setActiveStep(3);
             }} onBack={() => setActiveStep(1)}/>
         </ShowIf>
 
         <ShowIf step={activeStep} equalTo={3}>
             <GdprConsentForm onSuccess={output => {
-                setGdprFormOutput(output);
+                setStorageState({...storageState, gdprFormOutput: output});
                 setActiveStep(4)
             }} onBack={() => {
                 setActiveStep(2);
