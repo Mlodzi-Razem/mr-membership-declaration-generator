@@ -12,7 +12,7 @@ import valid from "validator";
 
 const {MrAutocomplete, MrTextInput} = Inputs<AddressFormFields>();
 const validateDistrict = (value: string) => {
-    if (value.trim().length < 1) {
+    if (value.trim().length < 1 || value.trim().length > 2) {
         return false;
     }
 
