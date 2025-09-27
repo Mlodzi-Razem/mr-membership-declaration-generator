@@ -37,6 +37,33 @@ function Summary({downloadFiles}: Readonly<{ downloadFiles: () => void }>) {
     </Stack>;
 }
 
+function ErrorDialog({open, isMobile, errorString, close}: Readonly<{
+    open: boolean,
+    isMobile: boolean,
+    close: () => void,
+    errorString: string
+}>) {
+    return <Dialog open={open} fullScreen={isMobile} fullWidth={true}>
+        {open && <>
+            <DialogTitle>Błąd podczas generowania dokumentów</DialogTitle>
+            <DialogContent>
+                <Paper variant='outlined' style={{padding: '1rem', marginBottom: '1rem'}}>
+                    <Typography variant='caption' style={{whiteSpace: "pre-wrap"}}>{errorString}</Typography>
+                </Paper>
+                <Typography variant='body2'>
+                    Zachęcamy do zgłoszenia błędu na&nbsp;
+                    <a href='https://github.com/Mlodzi-Razem/mr-membership-declaration-generator/issues' target='_blank'>
+                        naszym GitHubie
+                    </a>.
+                </Typography>
+                <DialogActions>
+                    <Button onClick={close}>Zamknij</Button>
+                </DialogActions>
+            </DialogContent>
+        </>}
+    </Dialog>;
+}
+
 export default function DownloadFilesView({context}: Readonly<{ context: DownloadFilesContext }>) {
     const [storageValue, setStorageValue] = useStorageValue('downloadedAlready', {downloadedAlready: false}); // to preserve the value even if the component gets remounted elsewhere (ex. during window resize)
     const [downloadFilesError, setDownloadFilesError] = useState<unknown>(null);
@@ -93,19 +120,10 @@ export default function DownloadFilesView({context}: Readonly<{ context: Downloa
                 <Logo/>
             </Grid>
         </Grid>}
-        <Dialog open={!!downloadFilesError} fullScreen={isMobile} fullWidth={true}>
-            {!!downloadFilesError && <>
-                <DialogTitle>Błąd podczas generowania dokumentów</DialogTitle>
-                <DialogContent>
-                    <Paper variant='outlined' style={{padding: '1rem'}}>
-                        <Typography variant='caption' style={{whiteSpace: "pre-wrap"}}>{errorString}</Typography>
-                    </Paper>
-                    <DialogActions>
-                        <Button onClick={() => setDownloadFilesError(null)}>Zamknij</Button>
-                    </DialogActions>
-                </DialogContent>
-            </>}
-        </Dialog>
+        <ErrorDialog open={!!downloadFilesError}
+                     isMobile={isMobile}
+                     close={() => setDownloadFilesError(null)}
+                     errorString={errorString}/>
     </>
         ;
 }

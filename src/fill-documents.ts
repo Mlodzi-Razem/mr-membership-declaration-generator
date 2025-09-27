@@ -17,9 +17,12 @@ export interface DownloadFilesContext {
 
 export function fillDeclaration(context: DownloadFilesContext): Promise<Blob> {
     const peselFields = context.peselOutput.pesel.map((field, index) => [`PESEL_${index}`, field] as const);
-    const districtFields = [
-        ['SEJM_0', context.addressOutput.district.at(0)!],
-        ['SEJM_1', context.addressOutput.district.at(1)!]
+    const districtFields = context.addressOutput.district.length == 2 ? [
+        ['SEJM_0', context.addressOutput.district[0]],
+        ['SEJM_1', context.addressOutput.district[1]]
+    ] as const : [
+        ['SEJM_0', '0'],
+        ['SEJM_1', context.addressOutput.district[0]]
     ] as const;
     const address = `${context.addressOutput.street} ${context.addressOutput.buildingNumber}` + (context.addressOutput.apartmentNumber ? `/${context.addressOutput.apartmentNumber}` : '');
 

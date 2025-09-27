@@ -63,9 +63,9 @@ function fillTextField(field: PDFField, fieldName: string, fieldValue: string) {
 function fillCheckbox(field: PDFField, fieldValue: boolean) {
     const checkBox = field as PDFCheckBox;
 
-    if (fieldValue && !checkBox.isChecked()) {
+    if (fieldValue) {
         checkBox.check();
-    } else if (checkBox.isChecked()) {
+    } else  {
         checkBox.uncheck();
     }
     checkBox.defaultUpdateAppearances();
