@@ -12,7 +12,7 @@ import valid from "validator";
 
 const {MrAutocomplete, MrTextInput} = Inputs<AddressFormFields>();
 const validateDistrict = (value: string) => {
-    if (value.length < 1) {
+    if (value.trim().length < 1) {
         return false;
     }
 
@@ -162,7 +162,10 @@ const AddressForm = MrForm<AddressFormFields, AddressFormOutput>('address', (for
         return {
             onSubmit: () => {
                 const formValues = getValues();
-                onSuccess(formValues);
+                onSuccess({
+                    ...formValues,
+                    district: (formValues.district ?? '--').trim(),
+                });
             },
             node: <>
                 {!usePostalMatchesResult.loading && usePostalMatchesResult.error && <Alert variant='outlined' severity='error'>
