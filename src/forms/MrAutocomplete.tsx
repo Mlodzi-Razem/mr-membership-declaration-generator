@@ -55,6 +55,7 @@ export default function MrAutocomplete({
                         <TextField
                             {...params}
                             inputRef={field.ref}
+                            disabled={disabled}
                             label={label}
                             error={Boolean(fieldState.error)}
                             helperText={fieldState.error?.message}

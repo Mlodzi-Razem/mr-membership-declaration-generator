@@ -1,5 +1,5 @@
-import { useMemo } from "react";
-import { parliament_district } from "../parliament-district.ts";
+import {useMemo} from "react";
+import {parliament_district} from "../parliament-district.ts";
 
 function normalizeName(s: string): string {
     if (!s) {

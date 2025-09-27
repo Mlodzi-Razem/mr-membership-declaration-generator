@@ -10,7 +10,7 @@ import {PersistQueryClientProvider} from '@tanstack/react-query-persist-client'
 import {createAsyncStoragePersister} from '@tanstack/query-async-storage-persister'
 import DownloadFilesView from "./DownloadFilesView.tsx";
 import styles from "./App.module.less"
-import useIsMobile from "./queries/useIsMobile.ts";
+import useIsMobile from "./hooks/useIsMobile.ts";
 import useStorageValue from "./useStorageValue.ts";
 
 const HOURS_24_MILLIS = 24 * 60 * 60 * 1000;
@@ -41,21 +41,21 @@ const AppForms = ({activeStep, setActiveStep}: { activeStep: number, setActiveSt
             <PeselForm onSuccess={output => {
                 setStorageState({...storageState, peselOutput: output});
                 setActiveStep(1);
-            }}/>
+            }} activeStep={activeStep}/>
         }
 
         {activeStep === 1 &&
             <ContactForm onSuccess={output => {
                 setStorageState({...storageState, contactOutput: output});
                 setActiveStep(2);
-            }} onBack={() => setActiveStep(0)}/>
+            }} onBack={() => setActiveStep(0)} activeStep={activeStep}/>
         }
 
         {activeStep === 2 &&
             <AddressForm onSuccess={output => {
                 setStorageState({...storageState, addressOutput: output});
                 setActiveStep(3);
-            }} onBack={() => setActiveStep(1)}/>
+            }} onBack={() => setActiveStep(1)} activeStep={activeStep}/>
         }
 
         {activeStep === 3 &&
@@ -64,7 +64,7 @@ const AppForms = ({activeStep, setActiveStep}: { activeStep: number, setActiveSt
                 setActiveStep(4)
             }} onBack={() => {
                 setActiveStep(2);
-            }} additionalProps={{isMinor: !!peselOutput?.requiresParentalConsent}}/>
+            }} additionalProps={{isMinor: !!peselOutput?.requiresParentalConsent}} activeStep={activeStep}/>
         }
 
         {activeStep === 4 &&
@@ -73,7 +73,7 @@ const AppForms = ({activeStep, setActiveStep}: { activeStep: number, setActiveSt
                 contactOutput: contactOutput!,
                 addressOutput: addressOutput!,
                 gdprFormOutput: gdprFormOutput!
-            }}/>
+            }} />
         }
     </>;
 }
@@ -84,8 +84,8 @@ function App() {
 
     return (
         <PersistQueryClientProvider client={queryClient} persistOptions={{persister: storagePersister}}>
+            <CssBaseline/>
             <div className={styles.container}>
-                <CssBaseline/>
                 <Grid container spacing={2} style={{width: '100%', maxWidth: '80rem', height: '100%'}}>
                     {!isMobile && <Grid size={4}>
                         <div style={{height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>

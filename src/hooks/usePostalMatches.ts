@@ -1,5 +1,5 @@
 import {useQuery} from "@tanstack/react-query";
-import useIsPostalCodeValid from "./useIsPostalCodeValid.ts";
+import validatePostalCode from "../validatePostalCode.ts";
 
 type CitiesApiResponse = ReadonlyArray<{
     kod: string,
@@ -22,8 +22,9 @@ export type UsePostalMatchesResult = { loading: true, matches?: PostalMatch[] } 
     loading: false,
     matches: PostalMatch[]
 }
+
 export default function usePostalMatches(postalCode: string): UsePostalMatchesResult {
-    const isValid = useIsPostalCodeValid(postalCode);
+    const isValid = validatePostalCode(postalCode);
 
     const queryResult = useQuery({
         queryKey: ['cities', postalCode],

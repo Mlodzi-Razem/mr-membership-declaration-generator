@@ -2,12 +2,13 @@ import MrForm from "./MrForm.tsx";
 import MrField from "./MrField.tsx";
 import {Backdrop, CircularProgress, Grid, TextField} from "@mui/material";
 import MrAutocomplete from './MrAutocomplete.tsx';
-import usePostalMatches, {type PostalMatch} from "../queries/usePostalMatches.ts";
+import usePostalMatches, {type PostalMatch} from "../hooks/usePostalMatches.ts";
 import distinct from "../distinct.ts";
-import useDistrictLookup from "../queries/useDistrictLookup.ts";
+import useDistrictLookup from "../hooks/useDistrictLookup.ts";
 import {useCallback, useEffect} from "react";
 import type {UseFormGetValues, UseFormSetValue} from "react-hook-form";
-import useIsMobile from "../queries/useIsMobile.ts";
+import useIsMobile from "../hooks/useIsMobile.ts";
+import validatePostalCode from "../validatePostalCode.ts";
 
 type AddressFormFields = {
     postalCode: string;
@@ -87,7 +88,7 @@ function useSuggestedValues(args: {
 }
 
 export const AddressForm = MrForm<AddressFormFields, AddressFormOutput>('address', (form, onSuccess) => {
-    const {register, watch, getValues, formState: {errors}, getFieldState, setValue} = form;
+    const {register, watch, getValues, formState: {errors}, setValue} = form;
     const isMobile = useIsMobile();
 
     const districtLookup = useDistrictLookup();
@@ -135,7 +136,7 @@ export const AddressForm = MrForm<AddressFormFields, AddressFormOutput>('address
         setValue('apartmentNumber', '');
     }, [setValue]);
 
-    const postalCodeInvalid = getFieldState('postalCode').invalid;
+    const postalCodeInvalid = !!errors.postalCode;
 
     return {
         onSubmit: () => {
@@ -153,6 +154,7 @@ export const AddressForm = MrForm<AddressFormFields, AddressFormOutput>('address
                         <TextField {...register("postalCode", {
                             required: true,
                             maxLength: 6,
+                            validate: validatePostalCode
                         })} onSelect={onPostalCodeChange}/>
                     </MrField>
                 </Grid>

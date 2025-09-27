@@ -1,7 +1,9 @@
 import MrForm from "./MrForm.tsx";
 import MrField from "./MrField.tsx";
-import { Grid, TextField } from "@mui/material";
-import useIsMobile from "../queries/useIsMobile.ts";
+import {Grid, TextField} from "@mui/material";
+import useIsMobile from "../hooks/useIsMobile.ts";
+import valid from 'validator';
+import MrAutocomplete from "./MrAutocomplete.tsx";
 
 type ContactFormFields = {
     formalName: string;
@@ -16,8 +18,18 @@ export type ContactFormOutput = ContactFormFields;
 
 const isBlank = (s: string): boolean => !s || s.trim() === '';
 
+const emailValidator = (email: string) => {
+    return valid.isEmail(email, {allow_display_name: true, allow_underscores: true, ignore_max_length: true});
+}
+
+const phoneNumberValidator = (phoneNumber: string) => {
+    const noSpaces = phoneNumber.replaceAll(' ', '');
+
+    return valid.isMobilePhone(noSpaces, 'pl-PL');
+}
+
 const ContactForm = MrForm<ContactFormFields, ContactFormOutput>('contact', (form, onSuccess) => {
-    const {register, watch, getValues} = form;
+    const {register, watch, getValues, formState: {errors}} = form;
     const isMobile = useIsMobile();
 
     const currentValues = watch();
@@ -35,12 +47,12 @@ const ContactForm = MrForm<ContactFormFields, ContactFormOutput>('contact', (for
         node: <>
             <Grid container spacing={2}>
                 <Grid size={isMobile ? 12 : 6}>
-                    <MrField label="Imię w dowodzie">
+                    <MrField label="Imię w dowodzie" fieldError={errors.formalName}>
                         <TextField {...register("formalName", {required: true})}/>
                     </MrField>
                 </Grid>
                 <Grid size={isMobile ? 12 : 6}>
-                    <MrField label="Nazwisko w dowodzie">
+                    <MrField label="Nazwisko w dowodzie" fieldError={errors.formalLastName}>
                         <TextField {...register("formalLastName", {required: true})}/>
                     </MrField>
                 </Grid>
@@ -48,7 +60,7 @@ const ContactForm = MrForm<ContactFormFields, ContactFormOutput>('contact', (for
 
             <Grid container spacing={2}>
                 <Grid size={isMobile ? 12 : 6}>
-                    <MrField label="Imię preferowane">
+                    <MrField label="Imię preferowane" fieldError={errors.preferredName}>
                         <TextField {...register(
                             "preferredName",
                             {required: false}
@@ -56,7 +68,7 @@ const ContactForm = MrForm<ContactFormFields, ContactFormOutput>('contact', (for
                     </MrField>
                 </Grid>
                 <Grid size={isMobile ? 12 : 6}>
-                    <MrField label="Nazwisko preferowane">
+                    <MrField label="Nazwisko preferowane" fieldError={errors.preferredLastName}>
                         <TextField {...register(
                             "preferredLastName",
                             {required: false}
@@ -65,14 +77,17 @@ const ContactForm = MrForm<ContactFormFields, ContactFormOutput>('contact', (for
                 </Grid>
             </Grid>
 
-            <MrField label="Zaimki">
-                <TextField {...register("pronouns", {required: false})}/>
+            <MrField label="Zaimki" fieldError={errors.pronouns}>
+                <MrAutocomplete name={'pronouns'}
+                                control={form.control}
+                                options={['on/jego', 'ona/jej', 'ono/jego', 'onu/jenu']}
+                                inputProps={register("pronouns", {required: false})}/>
             </MrField>
-            <MrField label="Adres e-mail">
-                <TextField {...register("email", {required: true})}/>
+            <MrField label="Adres e-mail" fieldError={errors.email}>
+                <TextField {...register("email", {required: true, validate: emailValidator})}/>
             </MrField>
-            <MrField label="Numer telefonu">
-                <TextField {...register("phoneNumber", {required: true})}/>
+            <MrField label="Numer telefonu" fieldError={errors.phoneNumber}>
+                <TextField {...register("phoneNumber", {required: true, validate: phoneNumberValidator})}/>
             </MrField>
         </>
     };

@@ -14,10 +14,8 @@ export type GdprConsentFormOutput = {
     parentName: string;
 };
 
-const GdprConsentForm = MrForm<GdprConsentFormFields, GdprConsentFormOutput, GdprConsentFormProps>('gdpr-consent', (form, onSuccess, {isMinor}) => {
-        const {register, getValues, watch} = form;
-        const publishingImageConsent = watch('publishingImageConsent');
-        const processingDataConsent = watch('processingDataConsent');
+const GdprConsentForm = MrForm<GdprConsentFormFields, GdprConsentFormOutput, GdprConsentFormProps>('gdpr-consent-form', (form, onSuccess, {isMinor}) => {
+        const {register, getValues} = form;
 
         return {
             onSubmit: () => {
@@ -34,7 +32,7 @@ const GdprConsentForm = MrForm<GdprConsentFormFields, GdprConsentFormOutput, Gdp
                     <ListItem>
                         <MrField label={<>utrwalenie i publikację mojego wizerunku na stronach internetowych,
                             w prasie, w mediach społecznościowych przez Stowarzyszenie.</>}>
-                            <Checkbox value={publishingImageConsent}  {...register("publishingImageConsent")}/>
+                            <Checkbox {...register("publishingImageConsent")}/>
                         </MrField>
                     </ListItem>
                     <ListItem>
@@ -44,8 +42,7 @@ const GdprConsentForm = MrForm<GdprConsentFormFields, GdprConsentFormOutput, Gdp
                                     przetwarzanie moich danych osobowych obejmujących dane szczególnej kategorii, w tym
                                     dotyczące preferowanego imienia, nazwiska, płci i poglądów politycznych.
                                 </>}>
-                                <Checkbox required={true}
-                                    value={processingDataConsent} {...register("processingDataConsent", {required: true})} />
+                                <Checkbox required={true} {...register("processingDataConsent", {required: true})} />
                             </MrField>
                         </Tooltip>
                     </ListItem>

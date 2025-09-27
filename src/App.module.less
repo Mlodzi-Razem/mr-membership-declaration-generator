@@ -1,26 +1,27 @@
 @mobile-container-width: 1024px;
 
 .container {
-    background: #E0E0E0FF;
+  background: #E0E0E0FF;
 
-    @media (max-width:  @mobile-container-width) {
-        background: white;
-    }
+  @media (max-width: @mobile-container-width) {
+    background: white;
+  }
 
-    width: 100%;
-    min-height: 100svh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+  width: 100%;
+  min-height: 100lvh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .container > :last-child {
-    background: #ffffff;
-    padding: 3.5rem;
-    border-radius: 20px;
+  background: #ffffff;
+  padding: 3.5rem;
+  border-radius: 20px;
 
-    @media (min-width: @mobile-container-width + 1px) {
-        margin-left: 1rem;
-        margin-right: 1rem;
-    }
+  @media (min-width: @mobile-container-width + 1px) {
+    margin-left: 1rem;
+    margin-right: 1rem;
+    box-shadow: 1px 1px 13px -5px rgba(133, 133, 144, 1);
+  }
 }

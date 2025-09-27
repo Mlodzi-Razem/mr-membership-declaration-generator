@@ -21,7 +21,7 @@ import {
     fillParentalConsentForm
 } from "./fill-documents.ts";
 import useStorageValue from "./useStorageValue.ts";
-import useIsMobile from "./queries/useIsMobile.ts";
+import useIsMobile from "./hooks/useIsMobile.ts";
 
 function Logo() {
     return <img src={logo} alt="Logo" style={{width: 'clamp(2rem, 100%, 15rem)'}}/>
