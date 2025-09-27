@@ -1,7 +1,6 @@
 import MrForm from "./MrForm.tsx";
 import MrField from "./MrField.tsx";
-import {Checkbox, List, ListItem, ListItemIcon, Stack, TextField, Tooltip, Typography} from "@mui/material";
-import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
+import {Checkbox, List, ListItem, Stack, TextField, Tooltip, Typography} from "@mui/material";
 
 type GdprConsentFormProps = { isMinor: boolean }
 type GdprConsentFormFields = {
@@ -24,8 +23,8 @@ const GdprConsentForm = MrForm<GdprConsentFormFields, GdprConsentFormOutput, Gdp
             onSubmit: () => {
                 const values = getValues();
                 onSuccess({
-                    processingDataConsent: values.processingDataConsent === 'true',
-                    publishingImageConsent: values.publishingImageConsent === 'true',
+                    processingDataConsent: values.processingDataConsent == 'true',
+                    publishingImageConsent: values.publishingImageConsent == 'true',
                     parentName: values.parentName
                 })
             },
@@ -33,25 +32,19 @@ const GdprConsentForm = MrForm<GdprConsentFormFields, GdprConsentFormOutput, Gdp
                 <Typography variant='h5'>Wyrażam zgodę na:</Typography>
                 <List>
                     <ListItem>
-                        <ListItemIcon>
-                            <KeyboardArrowRightIcon/>
-                        </ListItemIcon>
                         <MrField label={<>utrwalenie i publikację mojego wizerunku na stronach internetowych,
                             w prasie, w mediach społecznościowych przez Stowarzyszenie.</>}>
                             <Checkbox value={publishingImageConsent}  {...register("publishingImageConsent")}/>
                         </MrField>
                     </ListItem>
                     <ListItem>
-                        <ListItemIcon>
-                            <KeyboardArrowRightIcon/>
-                        </ListItemIcon>
                         <Tooltip title='Wymagane'>
                             <MrField
                                 label={<>
                                     przetwarzanie moich danych osobowych obejmujących dane szczególnej kategorii, w tym
                                     dotyczące preferowanego imienia, nazwiska, płci i poglądów politycznych.
                                 </>}>
-                                <Checkbox
+                                <Checkbox required={true}
                                     value={processingDataConsent} {...register("processingDataConsent", {required: true})} />
                             </MrField>
                         </Tooltip>

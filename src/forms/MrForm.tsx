@@ -61,26 +61,26 @@ export default function MrForm<F extends FieldValues, O, AdditionalProps = undef
                                    color="error"
                                    disabled={!form.formState.isValid}
                                    onClick={() => props.onBack ? props.onBack() : form.reset()}>Wstecz</Button>;
+        const bottomNavigation = <>{isMobile && <MobileStepper backButton={backButton}
+                                                    nextButton={submitButton}
+                                                    steps={StepperLabels.length}
+                                                    variant='dots'/>}
+            {!isMobile &&
+                <Grid container justifyContent="space-between">
+                    <Grid>
+                        {backButton}
+                    </Grid>
+                    <Grid>
+                        {submitButton}
+                    </Grid>
+                </Grid>}</>;
         return <form onSubmit={form.handleSubmit(onSubmit)} style={{height: '100%'}} ref={formRef}>
             <Stack spacing={2} justifyContent="space-between" style={{height: '100%'}}>
                 <Stack spacing={2}>
                     {node}
                 </Stack>
 
-                {isMobile && <MobileStepper backButton={backButton}
-                                            nextButton={submitButton}
-                                            steps={StepperLabels.length}
-                                            variant='dots'/>}
-                {!isMobile &&
-                    <Grid container justifyContent="space-between">
-                        <Grid>
-                            {backButton}
-                        </Grid>
-                        <Grid>
-                            {submitButton}
-                        </Grid>
-                    </Grid>}
-
+                {bottomNavigation}
             </Stack>
         </form>;
     }

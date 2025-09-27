@@ -1,6 +1,6 @@
-import type { Control, ControllerProps } from 'react-hook-form';
-import { Controller } from 'react-hook-form';
-import { Autocomplete, type SxProps, TextField, type Theme } from '@mui/material';
+import type {Control, ControllerProps} from 'react-hook-form';
+import {Controller} from 'react-hook-form';
+import {Autocomplete, type SxProps, TextField, type Theme} from '@mui/material';
 
 export type MrAutocompleteProps = {
     name: string;
@@ -31,7 +31,7 @@ export default function MrAutocomplete({
     value,
     sx,
     disabled
-}: MrAutocompleteProps) {
+}: Readonly<MrAutocompleteProps>) {
     return (
         <Controller
             name={name}
@@ -43,7 +43,7 @@ export default function MrAutocomplete({
                     options={options}
                     clearOnEscape={clearOnEscape}
                     sx={sx}
-                    value={value !== undefined ? value : (field.value ?? null)}
+                    value={value ?? (field.value ?? null)}
                     onChange={(_e, value) => {
                         field.onChange(value ?? '');
                         if (onSelect) {
@@ -58,6 +58,7 @@ export default function MrAutocomplete({
                             label={label}
                             error={Boolean(fieldState.error)}
                             helperText={fieldState.error?.message}
+                            variant={disabled ? 'filled' : 'outlined'}
                             {...(inputProps ?? {})}
                         />
                     )}

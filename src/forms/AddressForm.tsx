@@ -97,6 +97,7 @@ export const AddressForm = MrForm<AddressFormFields, AddressFormOutput>('address
     const street = watch('street') ?? '';
     const voivodeship = watch('voivodeship') ?? '';
     const province = watch('province') ?? '';
+    const buildingNumber = watch('buildingNumber') ?? '';
 
     const usePostalMatchesResult = usePostalMatches(postal);
     const postalMatches = usePostalMatchesResult.matches ?? [];
@@ -133,6 +134,9 @@ export const AddressForm = MrForm<AddressFormFields, AddressFormOutput>('address
         setValue('school', '');
         setValue('apartmentNumber', '');
     }, [setValue]);
+
+    const postalCodeInvalid = getFieldState('postalCode').invalid;
+
     return {
         onSubmit: () => {
             const formValues = getValues();
@@ -154,15 +158,15 @@ export const AddressForm = MrForm<AddressFormFields, AddressFormOutput>('address
                 </Grid>
 
                 <Grid size={isMobile ? 12 : 9}>
-                    <MrField label="Miasto">
+                    <MrField label="Miasto" fieldError={errors.city}>
                         <MrAutocomplete
                             name="city"
                             control={form.control}
-                            disabled={getFieldState('postalCode').invalid}
+                            disabled={postalCodeInvalid}
                             options={suggestedCities}
                             value={city}
                             onSelect={trySetDistrict}
-                            inputProps={{...register("city", {required: true})}}
+                            inputProps={{...register("city", {required: !postalCodeInvalid})}}
                             sx={{width: '100%'}}
                         />
                     </MrField>
@@ -171,56 +175,58 @@ export const AddressForm = MrForm<AddressFormFields, AddressFormOutput>('address
 
             <Grid container spacing={2}>
                 <Grid size={isMobile ? 12 : 5}>
-                    <MrField label="Województwo">
+                    <MrField label="Województwo" fieldError={errors.voivodeship}>
                         <MrAutocomplete name="voivodeship"
-                                        disabled={getFieldState('postalCode').invalid}
+                                        disabled={postalCodeInvalid}
                                         control={form.control}
                                         options={suggestedVoivodeships}
                                         value={voivodeship}
-                                        inputProps={{...register("voivodeship", {required: true})}}/>
+                                        inputProps={{...register("voivodeship", {required: !postalCodeInvalid})}}/>
                     </MrField>
                 </Grid>
                 <Grid size={isMobile ? 6 : 4}>
-                    <MrField label='Powiat'>
+                    <MrField label='Powiat' fieldError={errors.province}>
                         <MrAutocomplete value={province}
                                         name='province'
-                                        control={form.control} options={suggestedProvinces}
-                                        inputProps={{...register("province", {required: true})}}/>
+                                        disabled={province === ''}
+                                        control={form.control}
+                                        options={suggestedProvinces}
+                                        inputProps={{...register("province", {required: province.length > 0})}}/>
                     </MrField>
                 </Grid>
                 <Grid size={isMobile ? 6 : 3}>
-                    <MrField label="Okręg wyborczy">
-                        <TextField disabled={city === ''} {...register("district", {required: true})}/>
+                    <MrField label="Okręg wyborczy" fieldError={errors.district}>
+                        <TextField disabled={city === ''} {...register("district", {required: city.length > 0})}/>
                     </MrField>
                 </Grid>
             </Grid>
 
             <Grid container spacing={2}>
                 <Grid size={isMobile ? 12 : 5}>
-                    <MrField label="Ulica">
+                    <MrField label="Ulica" fieldError={errors.street}>
                         <MrAutocomplete
                             name="street"
                             control={form.control}
                             options={suggestedStreets}
                             value={street ?? ''}
                             disabled={city === ''}
-                            inputProps={{...register("street", {required: true})}}
+                            inputProps={{...register("street", {required: city.length > 0})}}
                             sx={{width: '100%'}}
                         />
                     </MrField>
                 </Grid>
                 <Grid size={isMobile ? 6 : 4}>
-                    <MrField label="Numer budynku">
-                        <TextField disabled={street === ''} {...register("buildingNumber", {required: true})}/>
+                    <MrField label="Numer budynku" fieldError={errors.buildingNumber}>
+                        <TextField disabled={street === ''} {...register("buildingNumber", {required: street.length > 0})}/>
                     </MrField>
                 </Grid>
                 <Grid size={isMobile ? 6 : 3}>
-                    <MrField label="Numer lokalu">
-                        <TextField{...register("apartmentNumber", {required: false})}/>
+                    <MrField label="Numer lokalu" fieldError={errors.apartmentNumber}>
+                        <TextField disabled={buildingNumber === ''} {...register("apartmentNumber", {required: false})}/>
                     </MrField>
                 </Grid>
                 <Grid size={12}>
-                    <MrField label="Nazwa szkoły (jeżeli uczęszczasz)">
+                    <MrField label="Nazwa szkoły (jeżeli uczęszczasz)" fieldError={errors.school}>
                         <TextField {...register("school", {required: false})}/>
                     </MrField>
                 </Grid>

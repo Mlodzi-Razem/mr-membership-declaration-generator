@@ -1,10 +1,22 @@
 import type {FieldError} from "react-hook-form";
-import {Checkbox, FormControl, FormControlLabel, FormLabel, Select, TextField} from "@mui/material";
+import {
+    Checkbox,
+    type CheckboxProps,
+    FormControl,
+    FormControlLabel,
+    FormLabel,
+    Select,
+    type SelectProps,
+    TextField,
+    type TextFieldProps,
+    type TextFieldVariants
+} from "@mui/material";
 import * as React from "react";
+import MrAutocomplete, {type MrAutocompleteProps} from "./MrAutocomplete.tsx";
 
 export default function MrField({label, fieldError, children}: Readonly<{
     fieldError?: FieldError,
-    children: React.ReactElement<typeof TextField | typeof Checkbox | typeof Select>,
+    children: React.ReactElement<TextFieldProps | CheckboxProps | SelectProps | MrAutocompleteProps, typeof TextField | typeof Checkbox | typeof Select | typeof MrAutocomplete>,
     label: React.ReactNode
 }>) {
     if (!children) {
@@ -12,15 +24,24 @@ export default function MrField({label, fieldError, children}: Readonly<{
     }
 
     const isCheckbox = children.type === Checkbox;
+    const isAutocomplete = children.type === MrAutocomplete;
+
+    const child = isAutocomplete
+        ? children
+        : React.cloneElement(
+            children,
+            {
+                error: !!fieldError,
+                helperText: fieldError?.message,
+                variant: (children.props.disabled ? 'filled' : 'outlined') as TextFieldVariants
+            } as never
+        );
 
     return <FormControl error={!!fieldError} style={{width: '100%'}}>
         {!isCheckbox && <FormLabel>{label}</FormLabel>}
         {isCheckbox
-            ? <FormControlLabel control={children} label={label}/>
-            : React.cloneElement(
-                children,
-                {error: !!fieldError, helperText: fieldError?.message} as never
-            )}
+            ? <FormControlLabel control={children} label={label} />
+            : child}
     </FormControl>
 }
 
