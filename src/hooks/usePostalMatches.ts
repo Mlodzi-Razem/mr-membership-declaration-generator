@@ -1,5 +1,6 @@
 import {useQuery} from "@tanstack/react-query";
 import validatePostalCode from "../validatePostalCode.ts";
+import {Duration} from "luxon";
 
 type CitiesApiResponse = ReadonlyArray<{
     kod: string,
@@ -20,8 +21,11 @@ export interface PostalMatch {
 
 export type UsePostalMatchesResult = { loading: true, matches?: PostalMatch[] } | {
     loading: false,
-    matches: PostalMatch[]
+    matches: PostalMatch[],
+    error: boolean
 }
+
+const CACHE_MILLIS = Duration.fromObject({days: 1}).toMillis();
 
 export default function usePostalMatches(postalCode: string): UsePostalMatchesResult {
     const isValid = validatePostalCode(postalCode);
@@ -36,19 +40,22 @@ export default function usePostalMatches(postalCode: string): UsePostalMatchesRe
 
             return [];
         },
-        throwOnError: false
+        throwOnError: false,
+        retry: false,
+        staleTime: CACHE_MILLIS,
+        enabled: isValid
     })
 
     if (queryResult.isError) {
         console.error('Error fetching cities:', queryResult.error);
-        return {loading: false, matches: []};
+        return {loading: false, matches: [], error: true};
     }
 
     if (queryResult.isLoading) {
         return {loading: true};
     }
     if (!queryResult.data) {
-        return {loading: false, matches: []};
+        return {loading: false, matches: [], error: false};
     }
 
     const matches = queryResult.data.map(element => ({
@@ -58,5 +65,5 @@ export default function usePostalMatches(postalCode: string): UsePostalMatchesRe
         province: element.powiat
     }) as const);
 
-    return {loading: false, matches};
+    return {loading: false, matches, error: false};
 }

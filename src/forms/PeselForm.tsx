@@ -1,9 +1,10 @@
 import type {FixedArray, NumberCharacter} from "../types.ts";
 import {DateTime} from "luxon";
 import {decodePesel, validatePesel} from "../pesel.ts";
-import MrField from "./MrField.tsx";
-import {TextField} from "@mui/material";
 import MrForm from "./MrForm.tsx";
+import Inputs from "../inputs/Inputs.ts";
+
+const {MrTextInput} = Inputs<PeselFormFields>();
 
 type PeselFormFields = {
     birthDate: string;
@@ -32,10 +33,9 @@ function isParentalConsentRequired(birthDate: string): boolean {
 const DATE_FORMAT = 'dd.MM.yyyy';
 
 const PeselForm = MrForm<PeselFormFields, PeselFormOutput>('pesel', (form, onSuccess) => {
-    const {register, formState: {errors}, getValues, setValue} = form;
+    const {getValues, setValue, formState: {errors}} = form;
 
-    const onPeselInput = (e: {target: {value: string}}) => {
-        const pesel = e.target.value;
+    const onPeselInput = (pesel: string) => {
         const birthDate = getValues('birthDate') ?? '';
         const peselValid = validatePesel(pesel);
 
@@ -68,16 +68,17 @@ const PeselForm = MrForm<PeselFormFields, PeselFormOutput>('pesel', (form, onSuc
             onSuccess(output);
         },
         node: <>
-            <MrField label="PESEL" fieldError={errors.pesel}>
-                <TextField onSelect={onPeselInput as never} {...register("pesel", {required: true, validate: peselValidate})}/>
-            </MrField>
-
-            <MrField label="Data urodzenia" fieldError={errors.birthDate}>
-                <TextField {...register(
-                    "birthDate",
-                    {required: true, validate: birthDateValidate}
-                )} placeholder="Np. 31.03.1999"/>
-            </MrField>
+            <MrTextInput fieldName='pesel'
+                         label="Numer PESEL"
+                         validate={peselValidate}
+                         onInput={onPeselInput}
+                         required/>
+            <MrTextInput fieldName='birthDate'
+                         disabled={!!errors.pesel}
+                         label='Data urodzenia'
+                         validate={birthDateValidate}
+                         placeholder='Np. 31.03.1999'
+                         required/>
         </>
     }
 });

@@ -1,9 +1,10 @@
 import MrForm from "./MrForm.tsx";
-import MrField from "./MrField.tsx";
-import {Grid, TextField} from "@mui/material";
+import {Grid} from "@mui/material";
 import useIsMobile from "../hooks/useIsMobile.ts";
 import valid from 'validator';
-import MrAutocomplete from "./MrAutocomplete.tsx";
+import Inputs from "../inputs/Inputs.ts";
+
+const {MrTextInput, MrAutocomplete} = Inputs<ContactFormFields>();
 
 type ContactFormFields = {
     formalName: string;
@@ -23,13 +24,13 @@ const emailValidator = (email: string) => {
 }
 
 const phoneNumberValidator = (phoneNumber: string) => {
-    const noSpaces = phoneNumber.replaceAll(' ', '');
+    const noSpaces = phoneNumber.replaceAll(/\s/g, '');
 
     return valid.isMobilePhone(noSpaces, 'pl-PL');
 }
 
 const ContactForm = MrForm<ContactFormFields, ContactFormOutput>('contact', (form, onSuccess) => {
-    const {register, watch, getValues, formState: {errors}} = form;
+    const {watch, getValues} = form;
     const isMobile = useIsMobile();
 
     const currentValues = watch();
@@ -47,48 +48,37 @@ const ContactForm = MrForm<ContactFormFields, ContactFormOutput>('contact', (for
         node: <>
             <Grid container spacing={2}>
                 <Grid size={isMobile ? 12 : 6}>
-                    <MrField label="Imię w dowodzie" fieldError={errors.formalName}>
-                        <TextField {...register("formalName", {required: true})}/>
-                    </MrField>
+                    <MrTextInput fieldName='formalName' label='Imię w dowodzie' required/>
                 </Grid>
                 <Grid size={isMobile ? 12 : 6}>
-                    <MrField label="Nazwisko w dowodzie" fieldError={errors.formalLastName}>
-                        <TextField {...register("formalLastName", {required: true})}/>
-                    </MrField>
+                    <MrTextInput fieldName='formalLastName' label='Nazwisko w dowodzie' required/>
                 </Grid>
             </Grid>
 
             <Grid container spacing={2}>
                 <Grid size={isMobile ? 12 : 6}>
-                    <MrField label="Imię preferowane" fieldError={errors.preferredName}>
-                        <TextField {...register(
-                            "preferredName",
-                            {required: false}
-                        )} placeholder={currentValues.formalName}/>
-                    </MrField>
+                    <MrTextInput fieldName='preferredName'
+                                 label='Imię preferowane'
+                                 placeholder={currentValues.formalName}/>
                 </Grid>
                 <Grid size={isMobile ? 12 : 6}>
-                    <MrField label="Nazwisko preferowane" fieldError={errors.preferredLastName}>
-                        <TextField {...register(
-                            "preferredLastName",
-                            {required: false}
-                        )} placeholder={currentValues.formalLastName}/>
-                    </MrField>
+                    <MrTextInput fieldName='preferredLastName'
+                                 label='Nazwisko preferowane'
+                                 placeholder={currentValues.formalLastName}/>
                 </Grid>
             </Grid>
 
-            <MrField label="Zaimki" fieldError={errors.pronouns}>
-                <MrAutocomplete name={'pronouns'}
-                                control={form.control}
-                                options={['on/jego', 'ona/jej', 'ono/jego', 'onu/jenu']}
-                                inputProps={register("pronouns", {required: false})}/>
-            </MrField>
-            <MrField label="Adres e-mail" fieldError={errors.email}>
-                <TextField {...register("email", {required: true, validate: emailValidator})}/>
-            </MrField>
-            <MrField label="Numer telefonu" fieldError={errors.phoneNumber}>
-                <TextField {...register("phoneNumber", {required: true, validate: phoneNumberValidator})}/>
-            </MrField>
+            <MrAutocomplete fieldName='pronouns'
+                            label='Zaimki'
+                            options={['on/jego', 'ona/jej', 'ono/jego', 'onu/jenu']}/>
+            <MrTextInput fieldName='email'
+                         label='Adres e-mail'
+                         validate={emailValidator}
+                         required/>
+            <MrTextInput fieldName='phoneNumber'
+                         label='Numer telefonu'
+                         validate={phoneNumberValidator}
+                         required/>
         </>
     };
 });

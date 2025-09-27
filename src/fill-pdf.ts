@@ -24,10 +24,9 @@ export default async function fillPdf(base64Data: string, fields: Map<FieldName,
 
     await fixEncoding(document);
 
-    const formFields: PDFField[] = form.getFields();
 
     fields.forEach((fieldValue, fieldName) => {
-        const formField = formFields.find(f => f.getName() === fieldName);
+        const formField = form.getField(fieldName);
 
         if (!formField) {
             throw new Error(`Field ${fieldName} not found in PDF`);
@@ -64,9 +63,10 @@ function fillTextField(field: PDFField, fieldName: string, fieldValue: string) {
 function fillCheckbox(field: PDFField, fieldValue: boolean) {
     const checkBox = field as PDFCheckBox;
 
-    if (fieldValue) {
+    if (fieldValue && !checkBox.isChecked()) {
         checkBox.check();
-    } else {
+    } else if (checkBox.isChecked()) {
         checkBox.uncheck();
     }
+    checkBox.defaultUpdateAppearances();
 }

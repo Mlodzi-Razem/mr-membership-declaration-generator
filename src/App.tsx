@@ -1,31 +1,21 @@
 import PeselForm, {type PeselFormOutput} from "./forms/PeselForm.tsx";
-import {CssBaseline, Grid} from "@mui/material";
+import {Backdrop, CircularProgress, CssBaseline, Grid} from "@mui/material";
 import {useState} from "react";
 import MrStepper from "./MrStepper.tsx";
 import ContactForm, {type ContactFormOutput} from "./forms/ContactForm.tsx";
-import {AddressForm, type AddressFormOutput} from "./forms/AddressForm.tsx";
-import {QueryClient} from "@tanstack/react-query";
+import AddressForm, {type AddressFormOutput} from "./forms/AddressForm.tsx";
+import {QueryClient, useIsFetching} from "@tanstack/react-query";
 import GdprConsentForm, {type GdprConsentFormOutput} from "./forms/GdprConsentForm.tsx";
 import {PersistQueryClientProvider} from '@tanstack/react-query-persist-client'
-import {createAsyncStoragePersister} from '@tanstack/query-async-storage-persister'
 import DownloadFilesView from "./DownloadFilesView.tsx";
 import styles from "./App.module.less"
 import useIsMobile from "./hooks/useIsMobile.ts";
 import useStorageValue from "./useStorageValue.ts";
+import createIndexedDBPersister from "./createIndexedDBPersister.ts";
 
-const HOURS_24_MILLIS = 24 * 60 * 60 * 1000;
-const queryClient = new QueryClient({
-    defaultOptions: {
-        queries: {
-            gcTime: HOURS_24_MILLIS
-        }
-    }
-});
+const storagePersister = createIndexedDBPersister('mr-membership-declaration-generator-queries');
 
-const storagePersister = createAsyncStoragePersister({
-    storage: window.localStorage,
-    key: 'mr-membership-declaration-generator-query',
-})
+const queryClient = new QueryClient();
 
 const AppForms = ({activeStep, setActiveStep}: { activeStep: number, setActiveStep: (step: number) => void }) => {
     const [storageState, setStorageState] = useStorageValue<{
@@ -80,11 +70,16 @@ const AppForms = ({activeStep, setActiveStep}: { activeStep: number, setActiveSt
 
 function App() {
     const isMobile = useIsMobile();
+    const isLoading = useIsFetching() > 0;
     const [activeStep, setActiveStep] = useState(0);
 
     return (
         <PersistQueryClientProvider client={queryClient} persistOptions={{persister: storagePersister}}>
             <CssBaseline/>
+            <Backdrop open={isLoading}
+                      sx={(theme) => ({color: '#fff', zIndex: theme.zIndex.drawer + 1})}>
+                <CircularProgress color='inherit'/>
+            </Backdrop>
             <div className={styles.container}>
                 <Grid container spacing={2} style={{width: '100%', maxWidth: '80rem', height: '100%'}}>
                     {!isMobile && <Grid size={4}>
