@@ -176,8 +176,11 @@ const AddressForm = MrForm<AddressFormFields, AddressFormOutput>('address', (for
             const valuesToCheck = [normalize(cityValue)?.toString(), ...suggestedProvinces.map(normalize)];
             const firstValue = valuesToCheck.map(v => districtLookup.get(v) ?? districtLookup.get(provinceValue))
                 .filter(x => x !== undefined && x !== null)[0];
-            setValue('district', firstValue?.toString() ?? '');
-        }, [districtLookup, suggestedProvinces, setValue]);
+
+            if (getValues('district') === '') {
+                setValue('district', firstValue?.toString() ?? '');
+            }
+        }, [districtLookup, suggestedProvinces, setValue, getValues]);
 
         useSuggestedValues({
             suggestedCities,
