@@ -19,13 +19,9 @@ import LockIconOutlined from '@mui/icons-material/LockOutlined';
 import saveBlob from "./save-blob.ts";
 import * as React from "react";
 import {memo, useCallback, useState} from "react";
-import {
-    type DownloadFilesContext,
-    fillDeclaration,
-    fillGdprDeclaration,
-    fillParentalConsentForm
-} from "./fill-documents.ts";
+import useFillDocumentsFunctions, {type DownloadFilesContext} from "./hooks/useFillDocumentsFunctions.tsx";
 import useIsMobile from "./hooks/useIsMobile.ts";
+import FullContainerSpinner from "./FullContainerSpinner.tsx";
 
 function stringifyError(downloadFileError: unknown) {
     const downloadErrorObject = (!!downloadFileError && downloadFileError instanceof Error)
@@ -167,6 +163,16 @@ function Summary({downloadDeclaration, downloadParentalConsent, downloadGdprDecl
     </Stack>;
 }
 
+function ReportErrorPrompt() {
+    return <Typography variant='body2'>
+        Zachęcamy do zgłoszenia błędu na&nbsp;
+        <a href='https://github.com/Mlodzi-Razem/mr-membership-declaration-generator/issues'
+           target='_blank'>
+            naszym GitHubie
+        </a>.
+    </Typography>;
+}
+
 function ErrorDialog({open, fullscreen, errorString, close}: Readonly<{
     open: boolean,
     fullscreen: boolean,
@@ -180,13 +186,7 @@ function ErrorDialog({open, fullscreen, errorString, close}: Readonly<{
                 <Paper variant='outlined' style={{padding: '1rem', marginBottom: '1rem'}}>
                     <Typography variant='caption' style={{whiteSpace: "pre-wrap"}}>{errorString}</Typography>
                 </Paper>
-                <Typography variant='body2'>
-                    Zachęcamy do zgłoszenia błędu na&nbsp;
-                    <a href='https://github.com/Mlodzi-Razem/mr-membership-declaration-generator/issues'
-                       target='_blank'>
-                        naszym GitHubie
-                    </a>.
-                </Typography>
+                <ReportErrorPrompt/>
                 <DialogActions>
                     <Button onClick={close}>Zamknij</Button>
                 </DialogActions>
@@ -195,19 +195,50 @@ function ErrorDialog({open, fullscreen, errorString, close}: Readonly<{
     </Dialog>;
 }
 
-function useDownloadMethod(context: DownloadFilesContext, fileName: string, fillMethod: (context: DownloadFilesContext) => Promise<Blob>) {
+function useDownloadMethod(context: DownloadFilesContext, fileName: string, fillMethod?: (context: DownloadFilesContext) => Promise<Blob>) {
     return useCallback(async () => {
+        if (!fillMethod) {
+            throw new Error('No fillMethod provided');
+        }
+
         const blob = await fillMethod(context);
         saveBlob(blob, fileName);
     }, [context, fileName, fillMethod]);
 }
 
+function PageError({errors}: Readonly<{ errors: unknown[] }>) {
+    return <Stack spacing={2} justifyContent='center' style={{width: '100%', height: '100%'}}>
+        <Typography variant='h4'>Wystąpił błąd podczas pobierania plików</Typography>
+        <Typography variant='body1'>Spróbuj ponownie później.</Typography>
+
+        {errors.map((error, index) => <Typography key={String(error) + index} variant='caption'>
+            <Paper style={{width: '100%', padding: '1rem'}} variant='outlined'>
+                <div style={{width: '100%', whiteSpace: 'pre-wrap'}}>
+                    {stringifyError(error)}
+                </div>
+            </Paper>
+        </Typography>)}
+        <ReportErrorPrompt/>
+    </Stack>
+}
+
 export default function DownloadFilesView({context}: Readonly<{ context: DownloadFilesContext }>) {
     const isMobile = useIsMobile();
 
-    const downloadDeclaration = useDownloadMethod(context, 'MR-Deklaracja-czlonkowska.pdf', fillDeclaration);
-    const downloadGdprDeclaration = useDownloadMethod(context, 'MR-Deklaracja-RODO.pdf', fillGdprDeclaration);
-    const parentalConsentDownloadCallback = useDownloadMethod(context, 'MR-Zgoda-rodzica.pdf', fillParentalConsentForm);
+    const fillFunctions = useFillDocumentsFunctions();
+    const fill = 'fill' in fillFunctions ? fillFunctions.fill : undefined;
+
+    const downloadDeclaration = useDownloadMethod(context, 'MR-Deklaracja-czlonkowska.pdf', fill?.membershipPdf);
+    const downloadGdprDeclaration = useDownloadMethod(context, 'MR-Deklaracja-RODO.pdf', fill?.gdprPdf);
+    const parentalConsentDownloadCallback = useDownloadMethod(context, 'MR-Zgoda-rodzica.pdf', fill?.parentalConsentPdf);
+
+    if (fillFunctions.isLoading) {
+        return <FullContainerSpinner label='Pobieranie plików deklaracji'/>
+    }
+
+    if (fillFunctions.isError) {
+        return <PageError errors={fillFunctions.errors ?? []}/>
+    }
 
     const downloadParentalConsent = context.peselOutput.requiresParentalConsent ? parentalConsentDownloadCallback : undefined;
 
