@@ -12,11 +12,12 @@ import valid from "validator";
 
 const {MrAutocomplete, MrTextInput} = Inputs<AddressFormFields>();
 const validateDistrict = (value: string) => {
-    if (value.trim().length < 1 || value.trim().length > 2) {
+    const trimmed = value.trim();
+    if (trimmed.length < 1 || trimmed.length > 2) {
         return false;
     }
 
-    const noSpaces = value.replace(/\s/g, '');
+    const noSpaces = trimmed.replace(/\s/g, '');
     if (!valid.isNumeric(noSpaces, {no_symbols: true})) {
         return "Podana wartość nie jest liczbą";
     }
@@ -100,8 +101,8 @@ function useSuggestedValues(args: {
         }
 
         if (shouldTrigger) {
-            trigger();
-            setFocus('voivodeship');
+            setFocus('city');
+            setTimeout(() => trigger(), 50);
         }
 
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -168,9 +169,10 @@ const AddressForm = MrForm<AddressFormFields, AddressFormOutput>('address', (for
                 });
             },
             node: <>
-                {!usePostalMatchesResult.loading && usePostalMatchesResult.error && <Alert variant='outlined' severity='error'>
-                    Nie udało się pobrać listy podpowiedzi.
-                </Alert> }
+                {!usePostalMatchesResult.loading && usePostalMatchesResult.error &&
+                    <Alert variant='outlined' severity='error'>
+                        Nie udało się pobrać listy podpowiedzi.
+                    </Alert>}
 
                 <Grid container spacing={2}>
                     <Grid size={isMobile ? 12 : 3}>

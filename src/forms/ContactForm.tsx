@@ -20,7 +20,7 @@ export type ContactFormOutput = ContactFormFields;
 const isBlank = (s: string): boolean => !s || s.trim() === '';
 
 const emailValidator = (email: string) => {
-    return valid.isEmail(email, {allow_display_name: true, allow_underscores: true, ignore_max_length: true});
+    return valid.isEmail(email.trim(), {allow_display_name: true, allow_underscores: true, ignore_max_length: true});
 }
 
 const phoneNumberValidator = (phoneNumber: string) => {

@@ -36,16 +36,13 @@ const PeselForm = MrForm<PeselFormFields, PeselFormOutput>('pesel', (form, onSuc
     const {getValues, setValue, formState: {errors}} = form;
 
     const onPeselInput = (pesel: string) => {
-        const birthDate = getValues('birthDate') ?? '';
         const peselValid = validatePesel(pesel);
 
         if (peselValid) {
             const {birthDate: decodedBirthDate} = decodePesel(pesel);
 
-            if (birthDate === '') {
-                setValue('birthDate', decodedBirthDate.toFormat(DATE_FORMAT));
-                form.trigger();
-            }
+            setValue('birthDate', decodedBirthDate.toFormat(DATE_FORMAT));
+            form.trigger();
         }
     };
 
