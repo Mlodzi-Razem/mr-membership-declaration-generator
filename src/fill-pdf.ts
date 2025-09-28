@@ -1,13 +1,12 @@
 import {decodeFromBase64, PDFCheckBox, PDFDocument, PDFDropdown, PDFField, PDFTextField} from "pdf-lib";
 import fontkit from '@pdf-lib/fontkit';
-import helveticaBase64 from "./assets/Helvetica.ttf?base64";
 
 export type FieldName = string;
 export type FieldValue = string | boolean;
+export type Base64String = string;
 
-const helveticaBytes = decodeFromBase64(helveticaBase64);
 
-async function fixEncoding(document: PDFDocument) {
+async function fixEncoding(document: PDFDocument, helveticaBytes: Uint8Array) {
     document.registerFontkit(fontkit);
     const form = document.getForm();
     const pdfHelveticaFont = await document.embedFont(helveticaBytes);
@@ -17,13 +16,14 @@ async function fixEncoding(document: PDFDocument) {
     };
 }
 
-export default async function fillPdf(base64Data: string, fields: Map<FieldName, FieldValue>): Promise<Blob> {
-    const bytes = decodeFromBase64(base64Data);
+export type PdfData = Base64String | Uint8Array;
+
+export default async function fillPdf(data: PdfData, helveticaBytes: Uint8Array, fields: Map<FieldName, FieldValue>): Promise<Blob> {
+    const bytes = typeof data === 'string' ? decodeFromBase64(data) : data;
     const document = await PDFDocument.load(bytes);
     const form = document.getForm();
 
-    await fixEncoding(document);
-
+    await fixEncoding(document, helveticaBytes);
 
     fields.forEach((fieldValue, fieldName) => {
         const formField = form.getField(fieldName);

@@ -5,6 +5,7 @@ import type {BaseProps} from "./base-props.ts";
 export type MrAutocompleteProps<F extends FieldValues> = Readonly<{
     options: string[];
     onSelect?: (value: string) => void;
+    validate?: (value: string) => boolean | string | Promise<boolean | string>;
 }> & BaseProps<F>;
 
 export default function MrAutocompleteM<F extends FieldValues>(
@@ -14,7 +15,8 @@ export default function MrAutocompleteM<F extends FieldValues>(
         label,
         onSelect,
         disabled,
-        required
+        required,
+        validate
     }: MrAutocompleteProps<F>) {
     const {control, register, formState: {errors}} = useFormContext();
 
@@ -44,7 +46,7 @@ export default function MrAutocompleteM<F extends FieldValues>(
                             error={!!fieldState.error}
                             helperText={fieldState.error?.message}
                             variant={disabled ? 'filled' : 'outlined'}
-                            {...register(fieldName, {required})}
+                            {...register(fieldName, {required, validate: validate})}
                             style={{width: '100%'}}
                             onSelect={(_e) => {
                                 const value = (_e.target as never as {value: string}).value;

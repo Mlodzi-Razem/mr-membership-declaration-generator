@@ -41,7 +41,7 @@ export default function usePostalMatches(postalCode: string): UsePostalMatchesRe
             return [];
         },
         throwOnError: false,
-        retry: false,
+        retry: 2,
         staleTime: CACHE_MILLIS,
         enabled: isValid
     })

@@ -1,5 +1,5 @@
 import MrForm from "./MrForm.tsx";
-import {Alert, Grid} from "@mui/material";
+import {Alert, CircularProgress, Grid} from "@mui/material";
 import usePostalMatches, {type PostalMatch} from "../hooks/usePostalMatches.ts";
 import distinct from "../distinct.ts";
 import useDistrictLookup from "../hooks/useDistrictLookup.ts";
@@ -54,7 +54,30 @@ function getSuggestedStreets(postalMatches: PostalMatch[], cityInput: string) {
     );
 }
 
+const VOIVODESHIPS = [
+    'dolnośląskie',
+    'kujawsko-pomorskie',
+    'lubelskie',
+    'lubuskie',
+    'łódzkie',
+    'małopolskie',
+    'mazowieckie',
+    'opolskie',
+    'podkarpackie',
+    'podlaskie',
+    'pomorskie',
+    'śląskie',
+    'świętokrzyskie',
+    'warmińsko-mazurskie',
+    'wielkopolskie',
+    'zachodniopomorskie'
+];
+
 function getSuggestedVoivodeships(postalMatches: PostalMatch[]) {
+    if (postalMatches.length === 0) {
+        return VOIVODESHIPS;
+    }
+
     return distinct(postalMatches.map(m => m.voivodeship)).filter(x => !!x && x.trim() !== '');
 }
 
@@ -101,14 +124,32 @@ function useSuggestedValues(args: {
         }
 
         if (shouldTrigger) {
-            setFocus('city');
-            setTimeout(() => trigger(), 50);
+            setFocus('district');
+
+            setTimeout(() => {
+                trigger()
+            }, 150);
         }
 
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [suggestedCities[0], suggestedVoivodeships[0], suggestedStreets[0], suggestedProvinces[0]]);
 }
 
+function validateVoivodeship(value: string) {
+    const normalized = normalize(value);
+
+    const exists = VOIVODESHIPS.find(v => normalized === normalize(v));
+
+    if (!exists) {
+        return "Podane województwo nie istnieje"
+    }
+
+    return true;
+}
+
+function InputLoader() {
+    return <CircularProgress size='1rem'/>
+}
 
 const AddressForm = MrForm<AddressFormFields, AddressFormOutput>('address', (form, onSuccess) => {
         const {watch, getValues, formState: {errors}, setValue} = form;
@@ -180,6 +221,7 @@ const AddressForm = MrForm<AddressFormFields, AddressFormOutput>('address', (for
                                      label='Kod pocztowy'
                                      validate={validatePostalCode}
                                      onInput={onPostalCodeChange}
+                                     endAdornment={usePostalMatchesResult.loading ? <InputLoader /> : undefined}
                                      required/>
                     </Grid>
 
@@ -187,7 +229,8 @@ const AddressForm = MrForm<AddressFormFields, AddressFormOutput>('address', (for
                         <MrAutocomplete fieldName='voivodeship'
                                         label='Województwo'
                                         options={suggestedVoivodeships}
-                                        disabled={postalCodeInvalid}
+                                        disabled={postalCodeInvalid || usePostalMatchesResult.loading}
+                                        validate={validateVoivodeship}
                                         required/>
                     </Grid>
                 </Grid>
@@ -214,6 +257,7 @@ const AddressForm = MrForm<AddressFormFields, AddressFormOutput>('address', (for
                                      label='Okręg wyborczy'
                                      validate={validateDistrict}
                                      disabled={city === ''}
+                                     onFocus={() => trySetDistrict(city, province)}
                                      required/>
                     </Grid>
                 </Grid>
