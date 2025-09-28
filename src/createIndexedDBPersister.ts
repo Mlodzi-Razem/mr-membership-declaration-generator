@@ -66,9 +66,7 @@ export default function createIndexedDBPersister(databaseName: string): Persiste
         restoreClient(): Promise<PersistedClient | undefined> {
             return createRestoreClientPromise(databaseName, (db) => {
                 database = db;
-            }).then(client => {
-                return client;
-            })
+            });
         },
         async removeClient(): Promise<void> {
             if (database) {
