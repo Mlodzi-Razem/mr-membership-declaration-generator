@@ -1,20 +1,24 @@
 import {
+    Accordion,
+    AccordionDetails,
+    AccordionSummary,
     Button,
     Dialog,
     DialogActions,
     DialogContent,
     DialogTitle,
-    Grid,
     Paper,
     Stack,
     SvgIcon,
     type SvgIconProps,
-    Typography
+    Typography,
+    useTheme
 } from "@mui/material";
 
 import SupervisedUserCircleOutlinedIcon from '@mui/icons-material/SupervisedUserCircleOutlined';
 import DescriptionIconOutlined from '@mui/icons-material/DescriptionOutlined';
 import LockIconOutlined from '@mui/icons-material/LockOutlined';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 import saveBlob from "./save-blob.ts";
 import * as React from "react";
@@ -22,6 +26,7 @@ import {memo, useCallback, useState} from "react";
 import useFillDocumentsFunctions, {type DownloadFilesContext} from "./hooks/useFillDocumentsFunctions.tsx";
 import useIsMobile from "./hooks/useIsMobile.ts";
 import FullContainerSpinner from "./FullContainerSpinner.tsx";
+import {findBoardMail, type Voivodeship} from "./forms/voivodeships.tsx";
 
 function stringifyError(downloadFileError: unknown) {
     const downloadErrorObject = (!!downloadFileError && downloadFileError instanceof Error)
@@ -98,11 +103,11 @@ function SummaryTile({title, icon, download, isMobile}: Readonly<{
     }, [download, setFileDownloaded, setDownloadFileError, setErrorDialogOpen]);
 
     return <>
-        <Paper variant='outlined' style={{width: '100%', height: '100%', padding: '1rem', maxWidth: '20rem'}}>
+        <Paper variant='outlined' style={{width: '100%', height: '100%', padding: '1rem'}}>
             <div style={{
                 display: 'grid',
                 gridTemplateRows: 'auto auto 1fr auto',
-                gap: '1rem',
+                gap: '0.25rem',
                 justifyItems: 'center',
                 alignItems: 'start',
                 width: '100%',
@@ -128,46 +133,117 @@ function SummaryTile({title, icon, download, isMobile}: Readonly<{
     </>;
 }
 
-function Summary({downloadDeclaration, downloadParentalConsent, downloadGdprDeclaration, isMobile}: Readonly<{
-    downloadDeclaration: () => Promise<void>,
-    downloadParentalConsent?: () => Promise<void>,
-    downloadGdprDeclaration: () => Promise<void>,
-    isMobile: boolean
-}>) {
+function SigningInstructions({voivodeship}: Readonly<{ voivodeship: Voivodeship }>) {
+    const mainEmail = 'deklaracje@mlodzirazem.org';
+    const boardEmail = findBoardMail(voivodeship);
+    const pzSignerLink = 'https://moj.gov.pl/nforms/signer/upload?xFormsAppName=SIGNER';
+    const {palette: {divider: borderColor}} = useTheme();
 
+    const accordionItems = [
+        {
+            label: 'Podpisywanie odręczne',
+            content: <ul style={{margin: 0}}>
+                <li>Pobierz <b>wszystkie</b> dokumenty.</li>
+                <li>Wydrukuj pobrane dokumenty.</li>
+                <li>
+                    Podpisz wydrukowne dokumenty w oznaczonych miejsach. Wypełnij też pole{' '}
+                    <Typography variant='button'>Miejscowość i data wypełnienia</Typography>{' '}
+                    w prawym górnym rogu.
+                </li>
+                <li>
+                    Zeskanuj lub sfotografuj <b>wszystkie</b> podpisane dokumenty.
+                    Nie pomiń <b>żadnej</b> strony.
+                </li>
+                <li>
+                    Prześlij skany na <a href={`mailto:${mainEmail}`}>{mainEmail}</a> oraz na{' '}
+                    <a href={`mailto:${boardEmail}`}>{boardEmail}</a>.
+                </li>
+            </ul>
+        } as const,
+        {
+            label: 'Podpisywanie elektroniczne',
+            content: <ul style={{margin: 0}}>
+                <li>Pobierz <b>wszystkie</b> dokumenty.</li>
+                <li>Wejdź na stronę <a href={pzSignerLink}>{pzSignerLink}</a>.
+                </li>
+                <li>
+                    Postępuj zgodnie z instrukcjami. Powtórz proces <b>dla każdego pliku</b>.
+                </li>
+                <li>
+                    Pliki zwrócone przez aplikację prześlij na <a href={`mailto:${mainEmail}`}>{mainEmail}</a>{' '}
+                    oraz na <a href={`mailto:${boardEmail}`}>{boardEmail}</a>.
+                </li>
+            </ul>
+        } as const
+    ] as const;
 
-    return <Stack justifyContent='center' style={{width: '100%', height: '100%'}}>
-        <Stack spacing={2} alignItems='center' style={{width: '100%'}}>
-            <Typography variant='h6'>Pobierz pliki</Typography>
-            <Grid container spacing={2} justifyContent='center' style={{height: '100%', width: '100%'}}>
-                <Grid size={isMobile ? 12 : 4} justifyItems='center'>
-                    <SummaryTile title='Deklaracja członkowska'
-                                 icon={<DescriptionIconOutlined/>}
-                                 download={downloadDeclaration}
-                                 isMobile={isMobile}/>
-                </Grid>
-                <Grid size={isMobile ? 12 : 4} justifyItems='center'>
-                    <SummaryTile title='Deklaracja RODO'
-                                 icon={<LockIconOutlined/>}
-                                 download={downloadGdprDeclaration}
-                                 isMobile={isMobile}/>
-                </Grid>
-                {downloadParentalConsent && <Grid size={isMobile ? 12 : 4} justifyItems='center'>
-                    <SummaryTile title='Zgoda rodzica/opiekuna'
-                                 icon={<SupervisedUserCircleOutlinedIcon/>}
-                                 download={downloadParentalConsent}
-                                 isMobile={isMobile}/>
-                </Grid>}
-            </Grid>
-        </Stack>
+    return <div style={{
+        width: '100%',
+        border: `1px solid ${borderColor}`,
+        borderRadius: '0.25rem',
+        padding: '0.25rem'
+    }}>
+        {accordionItems.map(item =>
+            <Accordion key={item.label}
+                       elevation={0}
+                       disableGutters={true}>
+                <AccordionSummary expandIcon={<ExpandMoreIcon/>}>
+                    <Typography variant='overline'>{item.label}</Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                    {item.content}
+                </AccordionDetails>
+            </Accordion>)}
+    </div>;
+}
+
+function Summary(
+    {
+        downloadDeclaration,
+        downloadParentalConsent,
+        downloadGdprDeclaration,
+        isMobile,
+        voivodeship
+    }: Readonly<{
+        downloadDeclaration: () => Promise<void>,
+        downloadParentalConsent?: () => Promise<void>,
+        downloadGdprDeclaration: () => Promise<void>,
+        isMobile: boolean,
+        voivodeship: Voivodeship
+    }>) {
+
+    return <Stack spacing={2} alignItems='center' style={{width: '100%', height: '100%'}}>
+        <Typography variant='h6'>Pobierz pliki</Typography>
+        <div style={{width: '100%', display: 'flex', gap: '1rem'}}>
+            <div style={{width: '100%', height: '100%'}}>
+                <SummaryTile title='Deklaracja członkowska'
+                             icon={<DescriptionIconOutlined/>}
+                             download={downloadDeclaration}
+                             isMobile={isMobile}/>
+            </div>
+            <div style={{width: '100%', height: '100%'}}>
+                <SummaryTile title='Deklaracja RODO'
+                             icon={<LockIconOutlined/>}
+                             download={downloadGdprDeclaration}
+                             isMobile={isMobile}/>
+            </div>
+            {downloadParentalConsent && <div style={{width: '100%', height: '100%'}}>
+                <SummaryTile title='Zgoda rodzica/opiekuna'
+                             icon={<SupervisedUserCircleOutlinedIcon/>}
+                             download={downloadParentalConsent}
+                             isMobile={isMobile}/>
+            </div>}
+        </div>
+        <div style={{width: '100%'}}>
+            <SigningInstructions voivodeship={voivodeship}/>
+        </div>
     </Stack>;
 }
 
 function ReportErrorPrompt() {
     return <Typography variant='body2'>
-        Zachęcamy do zgłoszenia błędu na&nbsp;
-        <a href='https://github.com/Mlodzi-Razem/mr-membership-declaration-generator/issues'
-           target='_blank'>
+        Zachęcamy do zgłoszenia błędu na{' '}
+        <a href='https://github.com/Mlodzi-Razem/mr-membership-declaration-generator/issues' target='_blank'>
             naszym GitHubie
         </a>.
     </Typography>;
@@ -245,5 +321,6 @@ export default function DownloadFilesView({context}: Readonly<{ context: Downloa
     return <Summary downloadDeclaration={downloadDeclaration}
                     downloadGdprDeclaration={downloadGdprDeclaration}
                     downloadParentalConsent={downloadParentalConsent}
-                    isMobile={isMobile}/>
+                    isMobile={isMobile}
+                    voivodeship={context.addressOutput.voivodeship}/>
 }
