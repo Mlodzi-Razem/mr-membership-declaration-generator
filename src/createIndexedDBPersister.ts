@@ -14,7 +14,7 @@ async function createRestoreClientPromise(databaseName: string, setter: (databas
     return new Promise<PersistedClient>((resolve, reject) => {
         const openDbRequest = indexedDB.open(databaseName, 1);
 
-        openDbRequest.addEventListener('upgradeneeded', async e => {
+        const upgradeSchema = async (e: IDBVersionChangeEvent) => {
             try {
                 const db = (e.target as never as { result: IDBDatabase }).result;
 
@@ -25,8 +25,9 @@ async function createRestoreClientPromise(databaseName: string, setter: (databas
                 console.error("createRestoreClientPromise", "upgradeneeded", e);
                 reject(e);
             }
-        });
-        openDbRequest.addEventListener('success', async e => {
+        };
+
+        const restoreClient = async (e: Event) => {
             try {
                 const database = (e.target as never as { result: IDBDatabase }).result;
                 setter(database);
@@ -42,11 +43,16 @@ async function createRestoreClientPromise(databaseName: string, setter: (databas
                 console.error("createRestoreClientPromise", "success", e);
                 reject(e);
             }
-        });
-        openDbRequest.addEventListener('error', e => {
+        };
+
+        const reportError = (e: Event) => {
             console.error("createRestoreClientPromise", "error", e);
             reject(e);
-        })
+        };
+
+        openDbRequest.addEventListener('upgradeneeded', upgradeSchema);
+        openDbRequest.addEventListener('success', restoreClient);
+        openDbRequest.addEventListener('error', reportError)
     });
 }
 
