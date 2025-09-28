@@ -2,7 +2,9 @@ import {DateTime} from "luxon";
 
 const WEIGHTS = [1, 3, 7, 9, 1, 3, 7, 9, 1, 3];
 
-export function validatePesel(pesel: string | undefined | null): pesel is string {
+export function validatePesel(inputPesel: string | undefined | null): inputPesel is string {
+    const pesel = inputPesel?.trim();
+
     if (pesel === undefined || pesel === null || pesel.length !== 11) {
         return false;
     }
@@ -23,7 +25,7 @@ export type DecodedPesel = {
 }
 export function decodePesel(pesel: string): DecodedPesel {
     let year = parseInt(pesel.substring(0, 2), 10);
-    let month = parseInt(pesel.substring(2, 4), 10) - 1;
+    let month = parseInt(pesel.substring(2, 4), 10);
     const day = parseInt(pesel.substring(4, 6), 10);
 
     if (month > 80) {
@@ -41,8 +43,6 @@ export function decodePesel(pesel: string): DecodedPesel {
     } else {
         year += 1900;
     }
-
-    month++;
 
     const birthDate = DateTime.fromObject({year, month: month, day: day});
 
