@@ -3,7 +3,7 @@ import {Autocomplete, FormControl, FormLabel, TextField} from "@mui/material";
 import type {BaseProps} from "./base-props.ts";
 
 export type MrAutocompleteProps<F extends FieldValues> = Readonly<{
-    options: string[];
+    options: ReadonlyArray<string>;
     onSelect?: (value: string) => void;
     validate?: (value: string) => boolean | string | Promise<boolean | string>;
 }> & BaseProps<F>;

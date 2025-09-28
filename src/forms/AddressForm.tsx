@@ -9,6 +9,7 @@ import useIsMobile from "../hooks/useIsMobile.ts";
 import validatePostalCode from "../validatePostalCode.ts";
 import Inputs from "../inputs/Inputs.ts";
 import valid from "validator";
+import VOIVODESHIPS, {type Voivodeship} from "./voivodeships.tsx";
 
 const {MrAutocomplete, MrTextInput} = Inputs<AddressFormFields>();
 const validateDistrict = (value: string) => {
@@ -20,6 +21,10 @@ const validateDistrict = (value: string) => {
     const noSpaces = trimmed.replace(/\s/g, '');
     if (!valid.isNumeric(noSpaces, {no_symbols: true})) {
         return "Podana wartość nie jest liczbą";
+    }
+
+    if (!Number.isInteger(Number(noSpaces))) {
+        return "Podana wartość nie jest liczbą całkowitą";
     }
 
     return true;
@@ -36,7 +41,9 @@ type AddressFormFields = {
     province: string;
     school: string;
 };
-export type AddressFormOutput = AddressFormFields;
+export type AddressFormOutput = Omit<AddressFormFields, 'voivodeship'> & {
+    voivodeship: Voivodeship;
+};
 
 function normalize(x: string): string {
     return x.normalize('NFKD').trim().toLowerCase();
@@ -54,26 +61,7 @@ function getSuggestedStreets(postalMatches: PostalMatch[], cityInput: string) {
     );
 }
 
-const VOIVODESHIPS = [
-    'dolnośląskie',
-    'kujawsko-pomorskie',
-    'lubelskie',
-    'lubuskie',
-    'łódzkie',
-    'małopolskie',
-    'mazowieckie',
-    'opolskie',
-    'podkarpackie',
-    'podlaskie',
-    'pomorskie',
-    'śląskie',
-    'świętokrzyskie',
-    'warmińsko-mazurskie',
-    'wielkopolskie',
-    'zachodniopomorskie'
-];
-
-function getSuggestedVoivodeships(postalMatches: PostalMatch[]) {
+function getSuggestedVoivodeships(postalMatches: PostalMatch[]): ReadonlyArray<string> {
     if (postalMatches.length === 0) {
         return VOIVODESHIPS;
     }
@@ -82,10 +70,10 @@ function getSuggestedVoivodeships(postalMatches: PostalMatch[]) {
 }
 
 function useSuggestedValues(args: {
-    suggestedCities: string[],
-    suggestedVoivodeships: string[],
-    suggestedStreets: string[],
-    suggestedProvinces: string[],
+    suggestedCities: ReadonlyArray<string>,
+    suggestedVoivodeships: ReadonlyArray<string>,
+    suggestedStreets: ReadonlyArray<string>,
+    suggestedProvinces: ReadonlyArray<string>,
     form: UseFormReturn<AddressFormFields>
 }) {
     const {
@@ -210,6 +198,7 @@ const AddressForm = MrForm<AddressFormFields, AddressFormOutput>('address', (for
                 onSuccess({
                     ...formValues,
                     district: (formValues.district ?? '--').trim(),
+                    voivodeship: formValues.voivodeship.toLowerCase().trim() as Voivodeship // already validated
                 });
             },
             node: <>
