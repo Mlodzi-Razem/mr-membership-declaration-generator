@@ -1,4 +1,4 @@
-import {useState} from "react";
+import {useCallback, useState} from "react";
 
 export default function useStorageValue<T extends object>(key: string, initialValue: T, options?: {storage?: Storage}): [T, (value: T) => void] {
     const storage = options?.storage ?? sessionStorage;
@@ -6,11 +6,13 @@ export default function useStorageValue<T extends object>(key: string, initialVa
 
     const [, setToggledState] = useState(false);
 
+    const setStorageValue = useCallback((value: T) => {
+        storage.setItem(key, JSON.stringify(value));
+        setToggledState(prev => !prev); // rerender
+    }, [storage, key, setToggledState]);
+
     return [
         item === null ? initialValue : JSON.parse(item),
-        (value: T) => {
-            storage.setItem(key, JSON.stringify(value));
-            setToggledState(prev => !prev); // rerender
-        }
+        setStorageValue
     ]
 }
