@@ -102,7 +102,7 @@ function SummaryTile({title, icon, download, isMobile}: Readonly<{
         }
     }, [download, setFileDownloaded, setDownloadFileError, setErrorDialogOpen]);
 
-    return <>
+    return <div style={{flex: 1}}>
         <Paper variant='outlined' style={{width: '100%', height: '100%', padding: '1rem'}}>
             <div style={{
                 display: 'grid',
@@ -130,7 +130,7 @@ function SummaryTile({title, icon, download, isMobile}: Readonly<{
                      fullscreen={isMobile}
                      close={() => setErrorDialogOpen(false)}
                      errorString={errorString}/>
-    </>;
+    </div>;
 }
 
 function SigningInstructions({voivodeship}: Readonly<{ voivodeship: Voivodeship }>) {
@@ -214,25 +214,20 @@ function Summary(
 
     return <Stack spacing={2} alignItems='center' style={{width: '100%', height: '100%'}}>
         <Typography variant='h6'>Pobierz pliki</Typography>
-        <div style={{width: '100%', display: 'flex', gap: '1rem'}}>
-            <div style={{width: '100%', height: '100%'}}>
+        <div style={{width: '100%', display: 'flex', gap: '1rem', flexWrap: 'wrap'}}>
                 <SummaryTile title='Deklaracja członkowska'
                              icon={<DescriptionIconOutlined/>}
                              download={downloadDeclaration}
                              isMobile={isMobile}/>
-            </div>
-            <div style={{width: '100%', height: '100%'}}>
                 <SummaryTile title='Deklaracja RODO'
                              icon={<LockIconOutlined/>}
                              download={downloadGdprDeclaration}
                              isMobile={isMobile}/>
-            </div>
-            {downloadParentalConsent && <div style={{width: '100%', height: '100%'}}>
+            {downloadParentalConsent &&
                 <SummaryTile title='Zgoda rodzica/opiekuna'
                              icon={<SupervisedUserCircleOutlinedIcon/>}
                              download={downloadParentalConsent}
-                             isMobile={isMobile}/>
-            </div>}
+                             isMobile={isMobile}/>}
         </div>
         <div style={{width: '100%'}}>
             <SigningInstructions voivodeship={voivodeship}/>
