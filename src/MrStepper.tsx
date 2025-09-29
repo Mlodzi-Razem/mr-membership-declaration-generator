@@ -1,4 +1,5 @@
 import {Step, StepLabel, Stepper} from "@mui/material";
+import {memo} from "react";
 
 export const StepperLabels = [
     'Data urodzenia i PESEL',
@@ -8,10 +9,11 @@ export const StepperLabels = [
     'Pobierz pliki'
 ] as const;
 
-export default function MrStepper({activeStep}: Readonly<{ activeStep: number}>) {
+const MrStepper = memo(({activeStep}: Readonly<{ activeStep: number }>) => {
     return <Stepper activeStep={activeStep} orientation='vertical'>
         {StepperLabels.map(label => <Step key={label}>
             <StepLabel>{label}</StepLabel>
         </Step>)}
     </Stepper>;
-}
+});
+export default MrStepper;

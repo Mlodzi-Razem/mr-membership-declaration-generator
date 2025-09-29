@@ -7,6 +7,7 @@ import {
     DialogActions,
     DialogContent,
     DialogTitle,
+    Link,
     Paper,
     Stack,
     SvgIcon,
@@ -15,6 +16,8 @@ import {
     useTheme
 } from "@mui/material";
 
+import styles from "./DownloadFilesView.module.less";
+
 import SupervisedUserCircleOutlinedIcon from '@mui/icons-material/SupervisedUserCircleOutlined';
 import DescriptionIconOutlined from '@mui/icons-material/DescriptionOutlined';
 import LockIconOutlined from '@mui/icons-material/LockOutlined';
@@ -22,13 +25,18 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 import saveBlob from "./save-blob.ts";
 import * as React from "react";
-import {memo, useCallback, useState} from "react";
+import {memo, useCallback, useMemo, useState} from "react";
 import useFillDocumentsFunctions, {type DownloadFilesContext} from "./hooks/useFillDocumentsFunctions.tsx";
 import useIsMobile from "./hooks/useIsMobile.ts";
 import FullContainerSpinner from "./FullContainerSpinner.tsx";
 import {findBoardMail, type Voivodeship} from "./forms/voivodeships.tsx";
+import MrBottomNavigationView from "./MrBottomNavigationView.tsx";
 
 function stringifyError(downloadFileError: unknown) {
+    if (!downloadFileError) {
+        return '';
+    }
+
     const downloadErrorObject = (!!downloadFileError && downloadFileError instanceof Error)
         ? {
             name: downloadFileError.name,
@@ -39,42 +47,27 @@ function stringifyError(downloadFileError: unknown) {
     return JSON.stringify(downloadErrorObject, null, 2);
 }
 
-const SummaryIcon = memo(({icon, downloaded, hasError}: Readonly<{
+type MuiColor = 'success' | 'error' | 'primary';
+
+const SummaryIcon = memo(({icon, color}: Readonly<{
     icon: React.ReactElement<SvgIconProps, typeof SvgIcon>,
-    downloaded: boolean,
-    hasError: boolean
+    color: MuiColor
 }>) => {
-    if (hasError) {
-        return React.cloneElement(icon, {color: 'error'})
-    }
-
-    if (downloaded) {
-        return React.cloneElement(icon, {color: 'success'})
-    }
-
-    return icon;
+    return React.cloneElement(icon, {color: color})
 });
 
-const SummaryButton = memo(({downloadFileError, fileDownloaded, downloadCallback}: Readonly<{
+const SummaryButton = memo(({downloadFileError, fileDownloaded, downloadCallback, color}: Readonly<{
     downloadFileError: boolean,
     fileDownloaded: boolean,
-    downloadCallback: () => void
+    downloadCallback: () => void,
+    color: MuiColor,
 }>) => {
-    if (downloadFileError) return <Button variant='outlined'
-                                          style={{width: '100%'}}
-                                          color='error'
-                                          onClick={downloadCallback}>Spróbuj ponownie</Button>;
-
-    if (fileDownloaded) return <Button variant='outlined'
-                                       style={{width: '100%'}}
-                                       color='success'
-                                       onClick={downloadCallback}>Pobierz ponownie</Button>;
-
+    const text = fileDownloaded ? 'Pobierz ponownie' : downloadFileError ? 'Spróbuj ponownie' : 'Pobierz';
 
     return <Button variant='outlined'
                    style={{width: '100%'}}
-                   color='primary'
-                   onClick={downloadCallback}>Pobierz</Button>;
+                   color={color}
+                   onClick={downloadCallback}>{text}</Button>;
 });
 
 function SummaryTile({title, icon, download, isMobile}: Readonly<{
@@ -102,26 +95,21 @@ function SummaryTile({title, icon, download, isMobile}: Readonly<{
         }
     }, [download, setFileDownloaded, setDownloadFileError, setErrorDialogOpen]);
 
-    return <div style={{flex: 1}}>
-        <Paper variant='outlined' style={{width: '100%', height: '100%', padding: '1rem'}}>
-            <div style={{
-                display: 'grid',
-                gridTemplateRows: 'auto auto 1fr auto',
-                gap: '0.25rem',
-                justifyItems: 'center',
-                alignItems: 'start',
-                width: '100%',
-                height: '100%'
-            }}>
-                <SummaryIcon icon={icon} downloaded={fileDownloaded} hasError={!!downloadFileError}/>
-                <div style={{textAlign: "center", width: '100%'}}>
+    const color: MuiColor = downloadFileError ? 'error' : fileDownloaded ? 'success' : 'primary';
+
+    return <div className={styles.summaryTileContainer}>
+        <Paper variant='outlined' className={styles.summaryTilePaper}>
+            <div className={styles.summaryTileGrid}>
+                <SummaryIcon icon={icon} color={color}/>
+                <div className={styles.summaryTileTitleContainer}>
                     <Typography variant='overline'>{title}</Typography>
                 </div>
                 <div/>
-                <div style={{width: '100%', height: '100%', alignSelf: 'end', justifySelf: 'end'}}>
+                <div className={styles.summaryTileButtonContainer}>
                     <SummaryButton downloadFileError={!!downloadFileError}
                                    fileDownloaded={fileDownloaded}
-                                   downloadCallback={downloadCallback}/>
+                                   downloadCallback={downloadCallback}
+                                   color={color}/>
                 </div>
             </div>
         </Paper>
@@ -133,60 +121,64 @@ function SummaryTile({title, icon, download, isMobile}: Readonly<{
     </div>;
 }
 
-function SigningInstructions({voivodeship}: Readonly<{ voivodeship: Voivodeship }>) {
-    const mainEmail = 'deklaracje@mlodzirazem.org';
-    const boardEmail = findBoardMail(voivodeship);
-    const pzSignerLink = 'https://moj.gov.pl/nforms/signer/upload?xFormsAppName=SIGNER';
-    const {palette: {divider: borderColor}} = useTheme();
-
-    const accordionItems = [
-        {
-            label: 'Podpisywanie odręczne',
-            content: <ul style={{margin: 0}}>
-                <li>Pobierz <b>wszystkie</b> dokumenty.</li>
-                <li>Wydrukuj pobrane dokumenty.</li>
-                <li>
-                    Podpisz wydrukowne dokumenty w oznaczonych miejsach. Wypełnij też pole{' '}
-                    <Typography variant='button'>Miejscowość i data wypełnienia</Typography>{' '}
-                    w prawym górnym rogu.
-                </li>
-                <li>
-                    Zeskanuj lub sfotografuj <b>wszystkie</b> podpisane dokumenty.
-                    Nie pomiń <b>żadnej</b> strony.
-                </li>
-                <li>
-                    Prześlij skany na <a href={`mailto:${mainEmail}`}>{mainEmail}</a> oraz na{' '}
-                    <a href={`mailto:${boardEmail}`}>{boardEmail}</a>.
-                </li>
-            </ul>
-        } as const,
+const useSigningInstructionsItems = (mainEmail: string, boardEmail: string, pzSignerLink: string) => {
+    return useMemo(() => [{
+        label: 'Podpisywanie odręczne',
+        content: <ul>
+            <li>Pobierz <b>wszystkie</b> dokumenty.</li>
+            <li>Wydrukuj pobrane dokumenty.</li>
+            <li>
+                Podpisz wydrukowne dokumenty w oznaczonych miejsach. Wypełnij też pole{' '}
+                <Typography variant='button'>Miejscowość i data wypełnienia</Typography>{' '}
+                w prawym górnym rogu.
+            </li>
+            <li>
+                Zeskanuj lub sfotografuj <b>wszystkie</b> podpisane dokumenty.
+                Nie pomiń <b>żadnej</b> strony.
+            </li>
+            <li>
+                Prześlij skany na <Link href={`mailto:${mainEmail}`}>{mainEmail}</Link> oraz na{' '}
+                <Link href={`mailto:${boardEmail}`}>{boardEmail}</Link>.
+            </li>
+        </ul>
+    } as const,
         {
             label: 'Podpisywanie elektroniczne',
-            content: <ul style={{margin: 0}}>
+            content: <ul>
                 <li>Pobierz <b>wszystkie</b> dokumenty.</li>
-                <li>Wejdź na stronę <a href={pzSignerLink}>{pzSignerLink}</a>.
+                <li>Wejdź na <Link href={pzSignerLink}>{pzSignerLink}</Link>.
                 </li>
                 <li>
                     Postępuj zgodnie z instrukcjami. Powtórz proces <b>dla każdego pliku</b>.
                 </li>
                 <li>
-                    Pliki zwrócone przez aplikację prześlij na <a href={`mailto:${mainEmail}`}>{mainEmail}</a>{' '}
-                    oraz na <a href={`mailto:${boardEmail}`}>{boardEmail}</a>.
+                    Pliki zwrócone przez aplikację prześlij na <Link
+                    href={`mailto:${mainEmail}`}>{mainEmail}</Link>{' '}
+                    oraz na <Link href={`mailto:${boardEmail}`}>{boardEmail}</Link>.
                 </li>
             </ul>
         } as const
-    ] as const;
+    ] as const, [mainEmail, boardEmail, pzSignerLink]);
+};
 
-    return <div style={{
-        width: '100%',
-        border: `1px solid ${borderColor}`,
-        borderRadius: '0.25rem',
-        padding: '0.25rem'
-    }}>
-        {accordionItems.map(item =>
+const PZ_SIGNER_URL = 'https://moj.gov.pl/nforms/signer/upload?xFormsAppName=SIGNER';
+const MAIN_EMAIL = 'deklaracje@mlodzirazem.org';
+
+const SigningInstructions = ({voivodeship}: Readonly<{ voivodeship: Voivodeship }>) => {
+    const boardEmail = findBoardMail(voivodeship) ?? 'email Zarządu Okręgu';
+    const {palette: {divider: borderColor}} = useTheme();
+
+    const accordionItems = useSigningInstructionsItems(MAIN_EMAIL, boardEmail, PZ_SIGNER_URL);
+
+    const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
+
+    return <div className={styles.signingInstructionsContainer} style={{border: `1px solid ${borderColor}`}}>
+        {accordionItems.map((item, index) =>
             <Accordion key={item.label}
                        elevation={0}
-                       disableGutters={true}>
+                       disableGutters={true}
+                       expanded={expandedIndex === index}
+                       onChange={(_, isExpanded) => setExpandedIndex(isExpanded ? index : null)}>
                 <AccordionSummary expandIcon={<ExpandMoreIcon/>}>
                     <Typography variant='overline'>{item.label}</Typography>
                 </AccordionSummary>
@@ -195,9 +187,9 @@ function SigningInstructions({voivodeship}: Readonly<{ voivodeship: Voivodeship 
                 </AccordionDetails>
             </Accordion>)}
     </div>;
-}
+};
 
-function Summary(
+const Summary = memo((
     {
         downloadDeclaration,
         downloadParentalConsent,
@@ -210,46 +202,45 @@ function Summary(
         downloadGdprDeclaration: () => Promise<void>,
         isMobile: boolean,
         voivodeship: Voivodeship
-    }>) {
+    }>) => {
 
     return <Stack spacing={2} alignItems='center' style={{width: '100%', height: '100%'}}>
         <Typography variant='h6'>Pobierz pliki</Typography>
-        <div style={{width: '100%', display: 'flex', gap: '1rem', flexWrap: 'wrap'}}>
-                <SummaryTile title='Deklaracja członkowska'
-                             icon={<DescriptionIconOutlined/>}
-                             download={downloadDeclaration}
-                             isMobile={isMobile}/>
-                <SummaryTile title='Deklaracja RODO'
-                             icon={<LockIconOutlined/>}
-                             download={downloadGdprDeclaration}
-                             isMobile={isMobile}/>
+        <div className={styles.summaryContainer}>
+            <SummaryTile title='Deklaracja członkowska'
+                         icon={<DescriptionIconOutlined/>}
+                         download={downloadDeclaration}
+                         isMobile={isMobile}/>
+            <SummaryTile title='Deklaracja RODO'
+                         icon={<LockIconOutlined/>}
+                         download={downloadGdprDeclaration}
+                         isMobile={isMobile}/>
             {downloadParentalConsent &&
                 <SummaryTile title='Zgoda rodzica/opiekuna'
                              icon={<SupervisedUserCircleOutlinedIcon/>}
                              download={downloadParentalConsent}
                              isMobile={isMobile}/>}
         </div>
-        <div style={{width: '100%'}}>
-            <SigningInstructions voivodeship={voivodeship}/>
-        </div>
+
+        <SigningInstructions voivodeship={voivodeship}/>
     </Stack>;
-}
+});
 
-function ReportErrorPrompt() {
-    return <Typography variant='body2'>
+const ReportErrorPrompt = memo(() =>
+    <Typography variant='body2'>
         Zachęcamy do zgłoszenia błędu na{' '}
-        <a href='https://github.com/Mlodzi-Razem/mr-membership-declaration-generator/issues' target='_blank'>
+        <Link href='https://github.com/Mlodzi-Razem/mr-membership-declaration-generator/issues' target='_blank'>
             naszym GitHubie
-        </a>.
-    </Typography>;
-}
+        </Link>.
+    </Typography>
+);
 
-function ErrorDialog({open, fullscreen, errorString, close}: Readonly<{
+const ErrorDialog = memo(({open, fullscreen, errorString, close}: Readonly<{
     open: boolean,
     fullscreen: boolean,
     close: () => void,
     errorString: string
-}>) {
+}>) => {
     return <Dialog open={open} fullScreen={fullscreen} fullWidth={true}>
         {open && <>
             <DialogTitle>Błąd podczas generowania dokumentów</DialogTitle>
@@ -264,7 +255,7 @@ function ErrorDialog({open, fullscreen, errorString, close}: Readonly<{
             </DialogContent>
         </>}
     </Dialog>;
-}
+});
 
 function useDownloadMethod(context: DownloadFilesContext, fileName: string, fillMethod?: (context: DownloadFilesContext) => Promise<Blob>) {
     return useCallback(async () => {
@@ -277,7 +268,7 @@ function useDownloadMethod(context: DownloadFilesContext, fileName: string, fill
     }, [context, fileName, fillMethod]);
 }
 
-function PageError({errors}: Readonly<{ errors: unknown[] }>) {
+const PageError = memo(({errors}: Readonly<{ errors: unknown[] }>) => {
     return <Stack spacing={2} justifyContent='center' style={{width: '100%', height: '100%'}}>
         <Typography variant='h4'>Wystąpił błąd podczas pobierania plików</Typography>
         <Typography variant='body1'>Spróbuj ponownie później.</Typography>
@@ -291,9 +282,13 @@ function PageError({errors}: Readonly<{ errors: unknown[] }>) {
         </Typography>)}
         <ReportErrorPrompt/>
     </Stack>
-}
+});
 
-export default function DownloadFilesView({context}: Readonly<{ context: DownloadFilesContext }>) {
+export default function DownloadFilesView({context, onBack, activeStep}: Readonly<{
+    context: DownloadFilesContext,
+    onBack: () => void,
+    activeStep: number,
+}>) {
     const isMobile = useIsMobile();
 
     const fillFunctions = useFillDocumentsFunctions();
@@ -313,9 +308,16 @@ export default function DownloadFilesView({context}: Readonly<{ context: Downloa
 
     const downloadParentalConsent = context.peselOutput.requiresParentalConsent ? parentalConsentDownloadCallback : undefined;
 
-    return <Summary downloadDeclaration={downloadDeclaration}
-                    downloadGdprDeclaration={downloadGdprDeclaration}
-                    downloadParentalConsent={downloadParentalConsent}
-                    isMobile={isMobile}
-                    voivodeship={context.addressOutput.voivodeship}/>
+    return <MrBottomNavigationView activeStep={activeStep}
+                                   onBack={onBack}
+                                   isMobile={isMobile}
+                                   nextButtonEnabled={false}>
+        <div className={styles.container}>
+            <Summary downloadDeclaration={downloadDeclaration}
+                     downloadGdprDeclaration={downloadGdprDeclaration}
+                     downloadParentalConsent={downloadParentalConsent}
+                     isMobile={isMobile}
+                     voivodeship={context.addressOutput.voivodeship}/>
+        </div>
+    </MrBottomNavigationView>;
 }
